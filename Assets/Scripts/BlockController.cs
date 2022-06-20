@@ -3,13 +3,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
 
-public enum ShapeMode
-{
-    Triangle,
-    Square,
-    Gexsa,
-    Octo
-};
 
 public class BlockController : MonoBehaviour
 {
