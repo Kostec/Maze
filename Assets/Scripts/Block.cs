@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEngine.EventSystems;
 using System.IO;
 using UnityEngine;
 
@@ -53,15 +54,15 @@ public class Block : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetMouseButtonDown(0))
-        {
-            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-            RaycastHit2D hit = Physics2D.Raycast(ray.origin, ray.direction, Mathf.Infinity);
-            if (hit.collider.gameObject == gameObject)
-            {
-                onBlockClicked(gameObject);
-            }
-        }
+        //if (Input.GetMouseButtonDown(0))
+        //{
+        //    Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+        //    RaycastHit2D hit = Physics2D.Raycast(ray.origin, ray.direction, Mathf.Infinity);
+        //    if (hit.collider.gameObject == gameObject)
+        //    {
+        //        onBlockClicked(gameObject);
+        //    }
+        //}
     }
 
     public Sprite LoadNewSprite(string FilePath, float PixelsPerUnit = 100.0f)
@@ -84,6 +85,11 @@ public class Block : MonoBehaviour
                 return Tex2D;
         }
         return null;
+    }
+
+    private void OnMouseDown()
+    {
+        onBlockClicked(gameObject);
     }
 
 }
