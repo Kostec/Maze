@@ -42,11 +42,14 @@ public class BlockController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (inputHandler.KeyCheck())
+        if (inputHandler != null)
         {
-            if (finishCurrentState != null)
+            if (inputHandler.KeyCheck())
             {
-                finishCurrentState(this, new EventArgs());
+                if (finishCurrentState != null)
+                {
+                    finishCurrentState(this, new EventArgs());
+                }
             }
         }
     }
@@ -87,18 +90,13 @@ public class BlockController : MonoBehaviour
                 inputHandler = blockRotationHandler;
                 break;
             case GameState.PlayerMoving:
+                inputHandler = null;
+                break;
+            default:
+                inputHandler = null;
                 break;
         }
     }
-}
-
-public interface InputHandler
-{
-    public Dictionary<Vector2, GameObject> GameArray { get; set; }
-    public Vector2 BufferPosition { get; set; }
-    public KeyValuePair<Vector2, GameObject> SelectedBlock { get; set; }
-    public bool KeyCheck();
-    public void onBlockClicked(GameObject block);
 }
 public class FieldShiftHandler : InputHandler
 {
@@ -286,7 +284,6 @@ public class FieldShiftHandler : InputHandler
         SelectedBlock = new KeyValuePair<Vector2, GameObject>(foundedBlock.Key, foundedBlock.Value);
     }
 }
-
 public class BlockRotationHandler : InputHandler
 {
     public Dictionary<Vector2, GameObject> GameArray { get; set; }
@@ -303,12 +300,12 @@ public class BlockRotationHandler : InputHandler
     {
         if (Input.GetKeyUp(KeyCode.D))
         {
-            SelectedBlock.Value.transform.Rotate(new Vector3(0.5f, 0.5f, 0), 90);
+            SelectedBlock.Value.transform.Rotate(new Vector3(0.0f, 0.0f, 0.5f), -90);
             return false;
         }
         else if (Input.GetKeyUp(KeyCode.A))
         {
-            SelectedBlock.Value.transform.Rotate(new Vector3(0.5f, 0.5f, 0), -90);
+            SelectedBlock.Value.transform.Rotate(new Vector3(0.0f, 0.0f, 0.5f), 90);
             return false;
         }
         else if (Input.GetKeyUp(KeyCode.F))

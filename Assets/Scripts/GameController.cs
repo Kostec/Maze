@@ -38,11 +38,19 @@ public class GameController : MonoBehaviour
     public delegate void GameStateEventHandler(GameState newgameState);
     public event GameStateEventHandler onGameStateChanged;
 
+    GameObject player;
+
     // Start is called before the first frame update
     void Start()
     {
+        Vector3 playerSpawnPosition = new Vector3(0, 0, -1);
+        player = Instantiate(playerPrefab, playerSpawnPosition, Quaternion.identity);
+        Player _player = player.GetComponent<Player>();
+
         blockController.finishCurrentState += FinishCurrentState;
         onGameStateChanged += blockController.onGameStateChanged;
+        onGameStateChanged += _player.onGameStateChanged;
+        _player.finishCurrentState += FinishCurrentState;
 
         GameState = GameState.FieldShifting;
     }
