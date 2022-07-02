@@ -5,6 +5,7 @@ using UnityEngine;
 
 public enum GameState : uint
 {
+    None,
     FieldShifting,
     BlockRotate,
     PlayerMoving
@@ -58,7 +59,7 @@ public class GameController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+
     }
 
     private void FinishCurrentState(object sender, EventArgs e)
@@ -73,6 +74,9 @@ public class GameController : MonoBehaviour
                 break;
             case GameState.PlayerMoving:
                 GameState = GameState.FieldShifting;
+                break;
+            default:
+                GameState = GameState.None;
                 break;
         }
         Debug.Log($"GameState: {gameState}");

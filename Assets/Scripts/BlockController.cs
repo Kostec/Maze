@@ -35,8 +35,8 @@ public class BlockController : MonoBehaviour
 
     private void onBlockClicked(GameObject blockClicked)
     {
-        blockRotationHandler.onBlockClicked(bufferBlock);
-        fieldShiftHandler.onBlockClicked(blockClicked);
+        blockRotationHandler.onObjectClicked(bufferBlock);
+        fieldShiftHandler.onObjectClicked(blockClicked);
     }
 
     // Update is called once per frame
@@ -89,25 +89,27 @@ public class BlockController : MonoBehaviour
             case GameState.BlockRotate:
                 inputHandler = blockRotationHandler;
                 break;
-            case GameState.PlayerMoving:
-                inputHandler = null;
-                break;
             default:
                 inputHandler = null;
                 break;
         }
     }
+    public InputHandler getInputHandler()
+    {
+        return inputHandler;
+    }
 }
+
 public class FieldShiftHandler : InputHandler
 {
     public GameObject BufferBlock;
     public Dictionary<Vector2, GameObject> GameArray { get; set; }
-    public Vector2 BufferPosition { get; set; }
+    public Vector2 currentPosition { get; set; }
     public KeyValuePair<Vector2, GameObject> SelectedBlock { get; set; }
     public FieldShiftHandler(Dictionary<Vector2, GameObject> gameArray, Vector2 bufferPosition, GameObject bufferBlock)
     {
         GameArray = gameArray;
-        BufferPosition = bufferPosition;
+        currentPosition = bufferPosition;
         BufferBlock = bufferBlock;
         SelectedBlock = new KeyValuePair<Vector2, GameObject>();
     }
@@ -241,7 +243,7 @@ public class FieldShiftHandler : InputHandler
         BufferBlock.transform.position = newBufferLocation;
         GameArray[newBufferLocation] = BufferBlock;
         BufferBlock = toBuffer;
-        BufferBlock.transform.position = BufferPosition;
+        BufferBlock.transform.position = currentPosition;
         // Reset selected block
         SelectedBlock = new KeyValuePair<Vector2, GameObject>();
     }
@@ -278,7 +280,7 @@ public class FieldShiftHandler : InputHandler
         return result;
     }
 
-    public void onBlockClicked(GameObject block)
+    public void onObjectClicked(GameObject block)
     {
         var foundedBlock = GameArray.FirstOrDefault((pair) => pair.Value == block);
         SelectedBlock = new KeyValuePair<Vector2, GameObject>(foundedBlock.Key, foundedBlock.Value);
@@ -287,7 +289,7 @@ public class FieldShiftHandler : InputHandler
 public class BlockRotationHandler : InputHandler
 {
     public Dictionary<Vector2, GameObject> GameArray { get; set; }
-    public Vector2 BufferPosition { get; set; }
+    public Vector2 currentPosition { get; set; }
     public KeyValuePair<Vector2, GameObject> SelectedBlock { get; set; }
 
     public BlockRotationHandler(Dictionary<Vector2, GameObject> gameArray, GameObject selectedBlock)
@@ -316,7 +318,7 @@ public class BlockRotationHandler : InputHandler
         return false;
     }
 
-    public void onBlockClicked(GameObject block)
+    public void onObjectClicked(GameObject block)
     {
         SelectedBlock = new KeyValuePair<Vector2, GameObject>(new Vector2(), block);
     }

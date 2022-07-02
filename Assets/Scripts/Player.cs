@@ -1,6 +1,4 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class Player : MonoBehaviour
@@ -18,42 +16,61 @@ public class Player : MonoBehaviour
 
     public EventHandler finishCurrentState;
 
+    private InputHandler inputhandler;
+
     bool playerCanMove;
     // Start is called before the first frame update
     void Start()
     {
-        
+        inputhandler = new PlayerInputHandler(gameObject);
     }
 
     // Update is called once per frame
     void Update()
     {
-        if (playerCanMove)
+        if (playerCanMove && inputhandler.KeyCheck())
         {
-            if (KeyCheck())
-            {
-                finishCurrentState(this, new EventArgs());
-            }
+            finishCurrentState(this, new EventArgs());
         }
     }
 
-    private bool KeyCheck()
+    public InputHandler getInputHandler()
+    {
+        return inputhandler;
+    }
+
+    public void onGameStateChanged(GameState newGameState)
+    {
+        playerCanMove = newGameState == GameState.PlayerMoving;
+    }
+}
+
+public class PlayerInputHandler : InputHandler
+{
+    private GameObject player;
+
+    public PlayerInputHandler(GameObject player)
+    {
+        this.player = player;
+    }
+
+    public bool KeyCheck()
     {
         if (Input.GetKeyUp(KeyCode.W))
         {
-            transform.position += new Vector3(0, 1, 0);
+            player.transform.position += new Vector3(0, 1, 0);
         }
         else if (Input.GetKeyUp(KeyCode.S))
         {
-            transform.position += new Vector3(0, -1, 0);
+            player.transform.position += new Vector3(0, -1, 0);
         }
         else if (Input.GetKeyUp(KeyCode.A))
         {
-            transform.position += new Vector3(-1, 0, 0);
+            player.transform.position += new Vector3(-1, 0, 0);
         }
         else if (Input.GetKeyUp(KeyCode.D))
         {
-            transform.position += new Vector3(1, 0, 0);
+            player.transform.position += new Vector3(1, 0, 0);
         }
         else if (Input.GetKeyUp(KeyCode.Q))
         {
@@ -61,7 +78,7 @@ public class Player : MonoBehaviour
             // \
             //  \
             //   \
-            transform.position += new Vector3(-1, 1, 0);
+            player.transform.position += new Vector3(-1, 1, 0);
         }
         else if (Input.GetKeyUp(KeyCode.C))
         {
@@ -69,7 +86,7 @@ public class Player : MonoBehaviour
             // \
             //  \
             //   \
-            transform.position += new Vector3(1, -1, 0);
+            player.transform.position += new Vector3(1, -1, 0);
         }
         else if (Input.GetKeyUp(KeyCode.E))
         {
@@ -77,7 +94,7 @@ public class Player : MonoBehaviour
             //   /
             //  /
             // /
-            transform.position += new Vector3(1, 1, 0);
+            player.transform.position += new Vector3(1, 1, 0);
         }
         else if (Input.GetKeyUp(KeyCode.Z))
         {
@@ -85,7 +102,7 @@ public class Player : MonoBehaviour
             //   /
             //  /
             // /
-            transform.position += new Vector3(-1, -1, 0);
+            player.transform.position += new Vector3(-1, -1, 0);
         }
         else if (Input.GetKeyUp(KeyCode.Space))
         {
@@ -94,8 +111,8 @@ public class Player : MonoBehaviour
         return false;
     }
 
-    public void onGameStateChanged(GameState newGameState)
+    public void onObjectClicked(GameObject block)
     {
-        playerCanMove = newGameState == GameState.PlayerMoving;
+        // TODO перемещение к позиции
     }
 }
