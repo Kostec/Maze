@@ -4,7 +4,7 @@ using UnityEngine;
 using System.Linq;
 using System;
 
-public class BlockController : MonoBehaviour
+public class FieldController : MonoBehaviour
 {
     [SerializeField]
     public uint heigth = 7;

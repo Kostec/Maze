@@ -17,7 +17,7 @@ public class GameController : MonoBehaviour
     [SerializeField]
     public GameObject playerPrefab;
     [SerializeField]
-    public BlockController blockController;
+    public FieldController blockController;
     [SerializeField]
     public uint playerNumber;
 
