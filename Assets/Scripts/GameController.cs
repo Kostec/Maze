@@ -17,7 +17,7 @@ public class GameController : MonoBehaviour
     [SerializeField]
     public GameObject playerPrefab;
     [SerializeField]
-    public FieldController blockController;
+    public FieldController fieldController;
     [SerializeField]
     public uint playerNumber;
 
@@ -48,8 +48,8 @@ public class GameController : MonoBehaviour
         player = Instantiate(playerPrefab, playerSpawnPosition, Quaternion.identity);
         Player _player = player.GetComponent<Player>();
 
-        blockController.finishCurrentState += FinishCurrentState;
-        onGameStateChanged += blockController.onGameStateChanged;
+        fieldController.finishCurrentState += FinishCurrentState;
+        onGameStateChanged += fieldController.onGameStateChanged;
         onGameStateChanged += _player.onGameStateChanged;
         _player.finishCurrentState += FinishCurrentState;
 

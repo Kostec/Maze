@@ -29,7 +29,7 @@ public class FieldController : MonoBehaviour
         gameArray = new Dictionary<Vector2, GameObject>();
         GenerateBlocks();
         fieldShiftHandler = new FieldShiftHandler(gameArray, bufferPosition, bufferBlock);
-        blockRotationHandler = new BlockRotationHandler(gameArray, bufferBlock);
+        blockRotationHandler = new BlockRotationHandler(bufferBlock);
         inputHandler = fieldShiftHandler;
     }
 
@@ -57,6 +57,7 @@ public class FieldController : MonoBehaviour
     private GameObject CreateBlock(Vector3 position)
     {
         GameObject currentBlock = Instantiate(blockPrefab, position, Quaternion.identity);
+        currentBlock.transform.Rotate(new Vector3(0.0f, 0.0f, 0.5f), 90 * UnityEngine.Random.Range(0, 3));
         Block obj = currentBlock.GetComponent<Block>();
         obj.onBlockClicked += onBlockClicked;
         var type = (BlockType)UnityEngine.Random.Range(0, 3);
@@ -109,14 +110,14 @@ public class FieldController : MonoBehaviour
 
 public class FieldShiftHandler : InputHandler
 {
-    public GameObject BufferBlock;
-    public Dictionary<Vector2, GameObject> GameArray { get; set; }
-    public Vector2 currentPosition { get; set; }
-    public KeyValuePair<Vector2, GameObject> SelectedBlock { get; set; }
+    public GameObject BufferBlock { get; set; }
+    private Dictionary<Vector2, GameObject> GameArray;
+    private Vector2 bufferPosition;
+    private KeyValuePair<Vector2, GameObject> SelectedBlock;
     public FieldShiftHandler(Dictionary<Vector2, GameObject> gameArray, Vector2 bufferPosition, GameObject bufferBlock)
     {
         GameArray = gameArray;
-        currentPosition = bufferPosition;
+        this.bufferPosition = bufferPosition;
         BufferBlock = bufferBlock;
         SelectedBlock = new KeyValuePair<Vector2, GameObject>();
     }
@@ -250,7 +251,7 @@ public class FieldShiftHandler : InputHandler
         BufferBlock.transform.position = newBufferLocation;
         GameArray[newBufferLocation] = BufferBlock;
         BufferBlock = toBuffer;
-        BufferBlock.transform.position = currentPosition;
+        BufferBlock.transform.position = bufferPosition;
         // Reset selected block
         SelectedBlock = new KeyValuePair<Vector2, GameObject>();
     }
@@ -295,14 +296,11 @@ public class FieldShiftHandler : InputHandler
 }
 public class BlockRotationHandler : InputHandler
 {
-    public Dictionary<Vector2, GameObject> GameArray { get; set; }
-    public Vector2 currentPosition { get; set; }
     public KeyValuePair<Vector2, GameObject> SelectedBlock { get; set; }
 
-    public BlockRotationHandler(Dictionary<Vector2, GameObject> gameArray, GameObject selectedBlock)
+    public BlockRotationHandler(GameObject selectedBlock)
     {
         SelectedBlock = new KeyValuePair<Vector2, GameObject>(new Vector2(), selectedBlock);
-        GameArray = gameArray;
     }
 
     public bool KeyCheck()
