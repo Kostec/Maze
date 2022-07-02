@@ -111,7 +111,7 @@ public class PlayerInputHandler : InputHandler
         return false;
     }
 
-    public void onObjectClicked(GameObject block)
+    public void onObjectSelected(GameObject block)
     {
         // TODO перемещение к позиции
     }

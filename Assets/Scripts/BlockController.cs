@@ -35,8 +35,8 @@ public class BlockController : MonoBehaviour
 
     private void onBlockClicked(GameObject blockClicked)
     {
-        blockRotationHandler.onObjectClicked(bufferBlock);
-        fieldShiftHandler.onObjectClicked(blockClicked);
+        blockRotationHandler.onObjectSelected(bufferBlock);
+        fieldShiftHandler.onObjectSelected(blockClicked);
     }
 
     // Update is called once per frame
@@ -54,6 +54,15 @@ public class BlockController : MonoBehaviour
         }
     }
 
+    private GameObject CreateBlock(Vector3 position)
+    {
+        GameObject currentBlock = Instantiate(blockPrefab, position, Quaternion.identity);
+        Block obj = currentBlock.GetComponent<Block>();
+        obj.onBlockClicked += onBlockClicked;
+        var type = (BlockType)UnityEngine.Random.Range(0, 3);
+        obj.SetType(type);
+        return currentBlock;
+    }
     private void GenerateBlocks()
     {
         if (gameArray.Count > 0)
@@ -68,17 +77,14 @@ public class BlockController : MonoBehaviour
         {
             for (int y = 0; y < heigth; y++)
             {
-                Vector2 position = new Vector2(x, y);
-                GameObject currentBlock = Instantiate(blockPrefab, position, Quaternion.identity);
-                Block obj = currentBlock.GetComponent<Block>();
-                obj.onBlockClicked += onBlockClicked;
+                Vector3 position = new Vector3(x, y, 0);
+                GameObject currentBlock = CreateBlock(position);
                 gameArray.Add(position, currentBlock);
             }
         }
 
-        bufferBlock = Instantiate(blockPrefab, bufferPosition, Quaternion.identity);
+        bufferBlock = CreateBlock(bufferPosition);
     }
-
     public void onGameStateChanged(GameState newGameState)
     {
         switch (newGameState)
@@ -88,6 +94,7 @@ public class BlockController : MonoBehaviour
                 break;
             case GameState.BlockRotate:
                 inputHandler = blockRotationHandler;
+                bufferBlock = fieldShiftHandler.BufferBlock;
                 break;
             default:
                 inputHandler = null;
@@ -280,7 +287,7 @@ public class FieldShiftHandler : InputHandler
         return result;
     }
 
-    public void onObjectClicked(GameObject block)
+    public void onObjectSelected(GameObject block)
     {
         var foundedBlock = GameArray.FirstOrDefault((pair) => pair.Value == block);
         SelectedBlock = new KeyValuePair<Vector2, GameObject>(foundedBlock.Key, foundedBlock.Value);
@@ -318,7 +325,7 @@ public class BlockRotationHandler : InputHandler
         return false;
     }
 
-    public void onObjectClicked(GameObject block)
+    public void onObjectSelected(GameObject block)
     {
         SelectedBlock = new KeyValuePair<Vector2, GameObject>(new Vector2(), block);
     }

@@ -4,5 +4,5 @@ using UnityEngine;
 public interface InputHandler
 {
     public bool KeyCheck();
-    public void onObjectClicked(GameObject block);
+    public void onObjectSelected(GameObject block);
 }
