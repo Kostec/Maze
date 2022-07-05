@@ -1,6 +1,8 @@
 using System;
 using UnityEngine;
 
+public delegate void PlayerMoving(Player player, Vector3 direction);
+
 public class Player : MonoBehaviour
 {
     public enum PlayerType
@@ -16,13 +18,17 @@ public class Player : MonoBehaviour
 
     public EventHandler finishCurrentState;
 
+    public event PlayerMoving onPlayerMoving;
+
     private InputHandler inputhandler;
 
     bool playerCanMove;
     // Start is called before the first frame update
     void Start()
     {
-        inputhandler = new PlayerInputHandler(gameObject);
+        PlayerInputHandler playerHandler = new PlayerInputHandler(gameObject);
+        playerHandler.onPlayerTryMoving += TryPlayerMoving;
+        inputhandler = playerHandler;
     }
 
     // Update is called once per frame
@@ -39,6 +45,11 @@ public class Player : MonoBehaviour
         return inputhandler;
     }
 
+    void TryPlayerMoving(Player player, Vector3 direction)
+    {
+        onPlayerMoving.Invoke(player, direction);
+    }
+
     public void onGameStateChanged(GameState newGameState)
     {
         playerCanMove = newGameState == GameState.PlayerMoving;
@@ -49,6 +60,8 @@ public class PlayerInputHandler : InputHandler
 {
     private GameObject player;
 
+    public event PlayerMoving onPlayerTryMoving;
+
     public PlayerInputHandler(GameObject player)
     {
         this.player = player;
@@ -58,19 +71,23 @@ public class PlayerInputHandler : InputHandler
     {
         if (Input.GetKeyUp(KeyCode.W))
         {
-            player.transform.position += new Vector3(0, 1, 0);
+            onPlayerTryMoving.Invoke(player.GetComponent<Player>(), new Vector3(0, 1, 0));
+            //player.transform.position += new Vector3(0, 1, 0);
         }
         else if (Input.GetKeyUp(KeyCode.S))
         {
-            player.transform.position += new Vector3(0, -1, 0);
+            onPlayerTryMoving.Invoke(player.GetComponent<Player>(), new Vector3(0, -1, 0));
+            //player.transform.position += new Vector3(0, -1, 0);
         }
         else if (Input.GetKeyUp(KeyCode.A))
         {
-            player.transform.position += new Vector3(-1, 0, 0);
+            onPlayerTryMoving.Invoke(player.GetComponent<Player>(), new Vector3(-1, 0, 0));
+            //player.transform.position += new Vector3(-1, 0, 0);
         }
         else if (Input.GetKeyUp(KeyCode.D))
         {
-            player.transform.position += new Vector3(1, 0, 0);
+            onPlayerTryMoving.Invoke(player.GetComponent<Player>(), new Vector3(1, 0, 0));
+            //player.transform.position += new Vector3(1, 0, 0);
         }
         else if (Input.GetKeyUp(KeyCode.Q))
         {
@@ -78,7 +95,8 @@ public class PlayerInputHandler : InputHandler
             // \
             //  \
             //   \
-            player.transform.position += new Vector3(-1, 1, 0);
+            onPlayerTryMoving.Invoke(player.GetComponent<Player>(), new Vector3(-1, 1, 0));
+            //player.transform.position += new Vector3(-1, 1, 0);
         }
         else if (Input.GetKeyUp(KeyCode.C))
         {
@@ -86,7 +104,8 @@ public class PlayerInputHandler : InputHandler
             // \
             //  \
             //   \
-            player.transform.position += new Vector3(1, -1, 0);
+            onPlayerTryMoving.Invoke(player.GetComponent<Player>(), new Vector3(1, -1, 0));
+            //player.transform.position += new Vector3(1, -1, 0);
         }
         else if (Input.GetKeyUp(KeyCode.E))
         {
@@ -94,7 +113,8 @@ public class PlayerInputHandler : InputHandler
             //   /
             //  /
             // /
-            player.transform.position += new Vector3(1, 1, 0);
+            onPlayerTryMoving.Invoke(player.GetComponent<Player>(), new Vector3(1, 1, 0));
+            //player.transform.position += new Vector3(1, 1, 0);
         }
         else if (Input.GetKeyUp(KeyCode.Z))
         {
@@ -102,7 +122,8 @@ public class PlayerInputHandler : InputHandler
             //   /
             //  /
             // /
-            player.transform.position += new Vector3(-1, -1, 0);
+            onPlayerTryMoving.Invoke(player.GetComponent<Player>(), new Vector3(-1, -1, 0));
+            //player.transform.position += new Vector3(-1, -1, 0);
         }
         else if (Input.GetKeyUp(KeyCode.Space))
         {

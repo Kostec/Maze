@@ -47,6 +47,7 @@ public class GameController : MonoBehaviour
         Vector3 playerSpawnPosition = new Vector3(0, 0, -1);
         player = Instantiate(playerPrefab, playerSpawnPosition, Quaternion.identity);
         Player _player = player.GetComponent<Player>();
+        _player.onPlayerMoving += PlayerMoveTo;
 
         fieldController.finishCurrentState += FinishCurrentState;
         onGameStateChanged += fieldController.onGameStateChanged;
@@ -54,6 +55,17 @@ public class GameController : MonoBehaviour
         _player.finishCurrentState += FinishCurrentState;
 
         GameState = GameState.FieldShifting;
+    }
+
+    void PlayerMoveTo(Player player, Vector3 direction)
+    {
+        Block block = fieldController.GetBlock(player.transform.position);
+        Block targetBblock = fieldController.GetBlock(player.transform.position + direction);
+        if ((block != null && block.PossibleDirections.Contains(direction)) &&
+                (targetBblock != null && targetBblock.PossibleDirections.Contains(direction)))
+        {
+            player.gameObject.transform.position += direction;
+        }
     }
 
     // Update is called once per frame
