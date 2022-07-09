@@ -19,6 +19,12 @@ public class FieldController : MonoBehaviour
     private Dictionary<Vector3, GameObject> gameArray;
     private Vector3 bufferPosition = new Vector3(-1, -1, 0);
     private InputHandler inputHandler;
+    private List<Vector3> FixedPoints = new List<Vector3>() {
+        new Vector3(3,3),
+        new Vector3(3,5),
+        new Vector3(5,3),
+        new Vector3(5,5),
+    };
 
     private BlockRotationHandler blockRotationHandler;
     private FieldShiftHandler fieldShiftHandler;
@@ -63,6 +69,7 @@ public class FieldController : MonoBehaviour
     {
         GameObject currentBlock = Instantiate(blockPrefab, position, Quaternion.identity);
         Block obj = currentBlock.GetComponent<Block>();
+        obj.FixedPoint = FixedPoints.Contains(position);
         obj.SetType((BlockType)UnityEngine.Random.Range(0, 3));
         obj.Rotate(90 * UnityEngine.Random.Range(0, 3));
         obj.onBlockClicked += onBlockClicked;
@@ -137,45 +144,25 @@ public class FieldShiftHandler : InputHandler
         {
             // Move up
             var toMove = GameArray.Where(pair => pair.Key.x == SelectedBlock.Key.x).OrderBy(pair => pair.Key.y).Reverse();
-            var first = toMove.First();
-            var last = toMove.Last();
-            MoveBlocks(toMove, new Vector3(0, 1));
-            SwapBufferBlock(first.Value, last.Key);
-            SelectedBlock = new KeyValuePair<Vector3, GameObject>();
-            return true;
+            return Shift(toMove, new Vector3(0, 1));
         }
         else if (Input.GetKeyUp(KeyCode.S))
         {
             // Move down
             var toMove = GameArray.Where(pair => pair.Key.x == SelectedBlock.Key.x).OrderBy(pair => pair.Key.y);
-            var first = toMove.First();
-            var last = toMove.Last();
-            MoveBlocks(toMove, new Vector3(0, -1));
-            SwapBufferBlock(first.Value, last.Key);
-            SelectedBlock = new KeyValuePair<Vector3, GameObject>();
-            return true;
+            return Shift(toMove, new Vector3(0, -1));
         }
         else if (Input.GetKeyUp(KeyCode.A))
         {
             // Move left
             var toMove = GameArray.Where(pair => pair.Key.y == SelectedBlock.Key.y).OrderBy(pair => pair.Key.x);
-            var first = toMove.First();
-            var last = toMove.Last();
-            MoveBlocks(toMove, new Vector3(-1, 0));
-            SwapBufferBlock(first.Value, last.Key);
-            SelectedBlock = new KeyValuePair<Vector3, GameObject>();
-            return true;
+            return Shift(toMove, new Vector3(-1, 0));
         }
         else if (Input.GetKeyUp(KeyCode.D))
         {
             // Move right
             var toMove = GameArray.Where(pair => pair.Key.y == SelectedBlock.Key.y).OrderBy(pair => pair.Key.x).Reverse();
-            var first = toMove.First();
-            var last = toMove.Last();
-            MoveBlocks(toMove, new Vector3(1, 0));
-            SwapBufferBlock(first.Value, last.Key);
-            SelectedBlock = new KeyValuePair<Vector3, GameObject>();
-            return true;
+            return Shift(toMove, new Vector3(1, 0));
         }
         else if (Input.GetKeyUp(KeyCode.Q))
         {
@@ -186,10 +173,7 @@ public class FieldShiftHandler : InputHandler
             var first = SelectedBlock;
             var last = SelectedBlock;
             var toMove = GetDiagonale(true, false, out first, out last);
-            MoveBlocks(toMove, new Vector3(-1, 1));
-            SwapBufferBlock(first.Value, last.Key);
-            SelectedBlock = new KeyValuePair<Vector3, GameObject>();
-            return true;
+            return Shift(toMove, new Vector3(-1, 1), first, last);
         }
         else if (Input.GetKeyUp(KeyCode.C))
         {
@@ -200,10 +184,7 @@ public class FieldShiftHandler : InputHandler
             var first = SelectedBlock;
             var last = SelectedBlock;
             var toMove = GetDiagonale(false, true, out first, out last);
-            MoveBlocks(toMove, new Vector3(1, -1));
-            SwapBufferBlock(first.Value, last.Key);
-            SelectedBlock = new KeyValuePair<Vector3, GameObject>();
-            return true;
+            return Shift(toMove, new Vector3(1, -1), first, last);
         }
         else if (Input.GetKeyUp(KeyCode.E))
         {
@@ -214,10 +195,7 @@ public class FieldShiftHandler : InputHandler
             var first = SelectedBlock;
             var last = SelectedBlock;
             var toMove = GetDiagonale(true, true, out first, out last);
-            MoveBlocks(toMove, new Vector3(1, 1));
-            SwapBufferBlock(first.Value, last.Key);
-            SelectedBlock = new KeyValuePair<Vector3, GameObject>();
-            return true;
+            return Shift(toMove, new Vector3(1, 1), first, last);
         }
         else if (Input.GetKeyUp(KeyCode.Z))
         {
@@ -228,12 +206,24 @@ public class FieldShiftHandler : InputHandler
             var first = SelectedBlock;
             var last = SelectedBlock;
             var toMove = GetDiagonale(false, false, out first, out last);
-            MoveBlocks(toMove, new Vector3(-1, -1));
-            SwapBufferBlock(first.Value, last.Key);
-            SelectedBlock = new KeyValuePair<Vector3, GameObject>();
-            return true;
+            return Shift(toMove, new Vector3(-1, -1), first, last);
         }
         return false;
+    }
+
+    private bool Shift(IEnumerable<KeyValuePair<Vector3, GameObject>> toMove, Vector3 offset, KeyValuePair<Vector3, GameObject> first = default, KeyValuePair<Vector3, GameObject> last = default)
+    {
+        if (toMove.FirstOrDefault(obj => obj.Value.GetComponent<Block>().FixedPoint).Value != null)
+        {
+            Debug.Log("Line have fixed block");
+            return false;
+        }
+        first = first.Value == default ? toMove.First() : first;
+        last = last.Value == default ? toMove.Last() : last; // Element which should be pop from field
+        MoveBlocks(toMove, offset);
+        SwapBufferBlock(first.Value, last.Key);
+        SelectedBlock = new KeyValuePair<Vector3, GameObject>();
+        return true;
     }
 
     private void MoveBlocks(IEnumerable<KeyValuePair<Vector3, GameObject>> toMove, Vector3 offset)

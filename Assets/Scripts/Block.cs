@@ -32,6 +32,7 @@ public class Block : MonoBehaviour
     [SerializeField]
     public Sprite[] sprites;
     public List<Vector3> PossibleDirections;
+    public bool FixedPoint = false;
     private int angle;
 
     // Start is called before the first frame update
