@@ -56,16 +56,16 @@ public class FieldController : MonoBehaviour
 
     public Block GetBlock(Vector3 position)
     {
+        position.z = 0;
         return gameArray.ContainsKey(position) ? gameArray[position].GetComponent<Block>() : null;
     }
     private GameObject CreateBlock(Vector3 position)
     {
         GameObject currentBlock = Instantiate(blockPrefab, position, Quaternion.identity);
         Block obj = currentBlock.GetComponent<Block>();
+        obj.SetType((BlockType)UnityEngine.Random.Range(0, 3));
         obj.Rotate(90 * UnityEngine.Random.Range(0, 3));
         obj.onBlockClicked += onBlockClicked;
-        var type = (BlockType)UnityEngine.Random.Range(0, 3);
-        obj.SetType(type);
         return currentBlock;
     }
     private void GenerateBlocks()
@@ -309,14 +309,19 @@ public class BlockRotationHandler : InputHandler
 
     public bool KeyCheck()
     {
+        
         if (Input.GetKeyUp(KeyCode.D))
         {
-            SelectedBlock.Value.transform.Rotate(new Vector3(0.0f, 0.0f, 0.5f), -90);
+            Block _block = SelectedBlock.Value.GetComponent<Block>();
+            _block.Rotate(-90);
+            //SelectedBlock.Value.transform.Rotate(new Vector3(0.0f, 0.0f, 0.5f), -90);
             return false;
         }
         else if (Input.GetKeyUp(KeyCode.A))
         {
-            SelectedBlock.Value.transform.Rotate(new Vector3(0.0f, 0.0f, 0.5f), 90);
+            Block _block = SelectedBlock.Value.GetComponent<Block>();
+            _block.Rotate(90);
+            //SelectedBlock.Value.transform.Rotate(new Vector3(0.0f, 0.0f, 0.5f), 90);
             return false;
         }
         else if (Input.GetKeyUp(KeyCode.F))

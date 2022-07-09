@@ -61,8 +61,9 @@ public class GameController : MonoBehaviour
     {
         Block block = fieldController.GetBlock(player.transform.position);
         Block targetBblock = fieldController.GetBlock(player.transform.position + direction);
+        direction.Normalize();
         if ((block != null && block.PossibleDirections.Contains(direction)) &&
-                (targetBblock != null && targetBblock.PossibleDirections.Contains(direction)))
+                (targetBblock != null && targetBblock.PossibleDirections.Contains(-direction)))
         {
             player.gameObject.transform.position += direction;
         }
