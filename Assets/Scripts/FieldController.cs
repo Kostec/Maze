@@ -4,6 +4,8 @@ using UnityEngine;
 using System.Linq;
 using System;
 
+public delegate void onLineShifted(IEnumerable<Vector3> line, Vector3 direction);
+
 public class FieldController : MonoBehaviour
 {
     [SerializeField]
@@ -20,15 +22,17 @@ public class FieldController : MonoBehaviour
     private Vector3 bufferPosition = new Vector3(-1, -1, 0);
     private InputHandler inputHandler;
     private List<Vector3> FixedPoints = new List<Vector3>() {
-        new Vector3(3,3),
-        new Vector3(3,5),
-        new Vector3(5,3),
+        new Vector3(1,1),
+        new Vector3(1,5),
+        new Vector3(5,1),
         new Vector3(5,5),
     };
 
     private BlockRotationHandler blockRotationHandler;
     private FieldShiftHandler fieldShiftHandler;
     public EventHandler finishCurrentState;
+    public event ClickBlockHandler onBlockClickedEvent;
+    public event onLineShifted OnLineShiftedEvent;
     // Start is called before the first frame update
     void Start()
     {
@@ -37,14 +41,8 @@ public class FieldController : MonoBehaviour
         fieldShiftHandler = new FieldShiftHandler(gameArray, bufferPosition, bufferBlock);
         blockRotationHandler = new BlockRotationHandler(bufferBlock);
         inputHandler = fieldShiftHandler;
+        fieldShiftHandler.OnLineShifted += OnLineShifted;
     }
-
-    private void onBlockClicked(GameObject blockClicked)
-    {
-        blockRotationHandler.onObjectSelected(bufferBlock);
-        fieldShiftHandler.onObjectSelected(blockClicked);
-    }
-
     // Update is called once per frame
     void Update()
     {
@@ -59,7 +57,22 @@ public class FieldController : MonoBehaviour
             }
         }
     }
-
+    public Dictionary<Vector3, Block> GetFieldArray()
+    {
+        Dictionary<Vector3, Block> dict = new Dictionary<Vector3, Block>();
+        foreach (var pair in gameArray)
+        {
+            dict.Add(pair.Key, pair.Value.GetComponent<Block>());
+        }
+        return dict;
+    }
+   
+    private void onBlockClicked(GameObject blockClicked)
+    {
+        blockRotationHandler.onObjectSelected(bufferBlock);
+        fieldShiftHandler.onObjectSelected(blockClicked);
+        onBlockClickedEvent?.Invoke(blockClicked);
+    }
     public Block GetBlock(Vector3 position)
     {
         position.z = 0;
@@ -70,7 +83,7 @@ public class FieldController : MonoBehaviour
         GameObject currentBlock = Instantiate(blockPrefab, position, Quaternion.identity);
         Block obj = currentBlock.GetComponent<Block>();
         obj.FixedPoint = FixedPoints.Contains(position);
-        obj.SetType((BlockType)UnityEngine.Random.Range(0, 3));
+        obj.SetType((BlockType)UnityEngine.Random.Range(0, 4));
         obj.Rotate(90 * UnityEngine.Random.Range(0, 3));
         obj.onBlockClicked += onBlockClicked;
         return currentBlock;
@@ -117,6 +130,10 @@ public class FieldController : MonoBehaviour
     {
         return inputHandler;
     }
+    private void OnLineShifted(IEnumerable<Vector3> line, Vector3 offset)
+    {
+        OnLineShiftedEvent?.Invoke(line, offset);
+    }
 }
 
 public class FieldShiftHandler : InputHandler
@@ -125,6 +142,7 @@ public class FieldShiftHandler : InputHandler
     private Dictionary<Vector3, GameObject> GameArray;
     private Vector3 bufferPosition;
     private KeyValuePair<Vector3, GameObject> SelectedBlock;
+    public event onLineShifted OnLineShifted;
     public FieldShiftHandler(Dictionary<Vector3, GameObject> gameArray, Vector3 bufferPosition, GameObject bufferBlock)
     {
         GameArray = gameArray;
@@ -223,6 +241,8 @@ public class FieldShiftHandler : InputHandler
         MoveBlocks(toMove, offset);
         SwapBufferBlock(first.Value, last.Key);
         SelectedBlock = new KeyValuePair<Vector3, GameObject>();
+        List<Vector3> shiftedLine = toMove.Select(pair => pair.Key).ToList();
+        OnLineShifted?.Invoke(shiftedLine, offset);
         return true;
     }
 

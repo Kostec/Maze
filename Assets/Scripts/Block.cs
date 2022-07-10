@@ -21,9 +21,10 @@ public enum ShapeMode
     Octo
 };
 
+public delegate void ClickBlockHandler(GameObject obj);
+
 public class Block : MonoBehaviour
 {
-    public delegate void ClickBlockHandler(GameObject obj);
     private SpriteRenderer spriteRenderer;
     public event ClickBlockHandler onBlockClicked;
 

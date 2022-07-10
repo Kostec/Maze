@@ -69,56 +69,9 @@ public class PlayerInputHandler : InputHandler
 
     public bool KeyCheck()
     {
-        if (Input.GetKeyUp(KeyCode.W))
+        if (Input.GetKeyUp(KeyCode.Space))
         {
-            onPlayerTryMoving.Invoke(player.GetComponent<Player>(), Vector3.up);
-        }
-        else if (Input.GetKeyUp(KeyCode.S))
-        {
-            onPlayerTryMoving.Invoke(player.GetComponent<Player>(), Vector3.down);
-        }
-        else if (Input.GetKeyUp(KeyCode.A))
-        {
-            onPlayerTryMoving.Invoke(player.GetComponent<Player>(), Vector3.left);
-        }
-        else if (Input.GetKeyUp(KeyCode.D))
-        {
-            onPlayerTryMoving.Invoke(player.GetComponent<Player>(), Vector3.right);
-        }
-        else if (Input.GetKeyUp(KeyCode.Q))
-        {
-            // Move diagonal up
-            // \
-            //  \
-            //   \
-            onPlayerTryMoving.Invoke(player.GetComponent<Player>(), Vector3.up + Vector3.left);
-        }
-        else if (Input.GetKeyUp(KeyCode.C))
-        {
-            // Move diagonal down
-            // \
-            //  \
-            //   \
-            onPlayerTryMoving.Invoke(player.GetComponent<Player>(), Vector3.down + Vector3.right);
-        }
-        else if (Input.GetKeyUp(KeyCode.E))
-        {
-            // Move diagonal up
-            //   /
-            //  /
-            // /
-            onPlayerTryMoving.Invoke(player.GetComponent<Player>(), Vector3.up + Vector3.right);
-        }
-        else if (Input.GetKeyUp(KeyCode.Z))
-        {
-            // Move diagonal down
-            //   /
-            //  /
-            // /
-            onPlayerTryMoving.Invoke(player.GetComponent<Player>(), Vector3.down + Vector3.left);
-        }
-        else if (Input.GetKeyUp(KeyCode.Space))
-        {
+            // Завершение движения
             return true;
         }
         return false;

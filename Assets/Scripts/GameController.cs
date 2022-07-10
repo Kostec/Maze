@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public enum GameState : uint
@@ -40,6 +41,7 @@ public class GameController : MonoBehaviour
     public event GameStateEventHandler onGameStateChanged;
 
     GameObject player;
+    private Pathfinder pathfinder;
 
     // Start is called before the first frame update
     void Start()
@@ -50,11 +52,29 @@ public class GameController : MonoBehaviour
         _player.onPlayerMoving += PlayerMoveTo;
 
         fieldController.finishCurrentState += FinishCurrentState;
+        fieldController.onBlockClickedEvent += onBlockClicked;
+        fieldController.OnLineShiftedEvent += onLineShifted;
         onGameStateChanged += fieldController.onGameStateChanged;
         onGameStateChanged += _player.onGameStateChanged;
         _player.finishCurrentState += FinishCurrentState;
 
         GameState = GameState.FieldShifting;
+        pathfinder = new Pathfinder();
+    }
+
+    void MovePlayerToTarget(GameObject player, Vector3 target)
+    {
+        pathfinder.SetField(fieldController.GetFieldArray());
+        Vector3 playerPosition = new Vector3(player.transform.position.x, player.transform.position.y);
+        var path = pathfinder.EstimatePath(playerPosition, target);
+        if (path.Count == 0)
+        {
+            Debug.Log("Onreachable path");
+            return;
+        }
+        Vector3 newPosition = path.First();
+        newPosition.z = -1;
+        player.transform.position = newPosition;
     }
 
     void PlayerMoveTo(Player player, Vector3 direction)
@@ -95,4 +115,18 @@ public class GameController : MonoBehaviour
         Debug.Log($"GameState: {gameState}");
     }
 
+    private void onLineShifted(IEnumerable<Vector3> line, Vector3 offset)
+    {
+        player.transform.position += offset;
+    }
+
+    private void onBlockClicked(GameObject obj)
+    {
+        Block block = obj.GetComponent<Block>();
+
+        if(GameState == GameState.PlayerMoving)
+        {
+            MovePlayerToTarget(player, block.transform.position);
+        }
+    }
 }
