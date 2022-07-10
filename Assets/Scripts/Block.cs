@@ -7,17 +7,35 @@ using UnityEngine;
 
 public enum BlockType
 {
+    // Square
     Straight, // Прямо
     Turn, // Поворот
     Crossroad_T, // Т-образный перекрёсток
-    Crossroad // перекрёсток
+    Crossroad, // перекрёсток
+    // Hexagon
+    Hex_cross,
+    Hex_J_road,
+    Hex_straight,
+    Hex_W_road,
+    Hex_X_road,
+    Hex_Y_road,
+}
+
+public enum HexType
+{
+    Hex_cross,
+    Hex_J_road,
+    Hex_straight,
+    Hex_W_road,
+    Hex_X_road,
+    Hex_Y_road,
 }
 
 public enum ShapeMode
 {
     Triangle,
     Square,
-    Gexsa,
+    Hexa,
     Octo
 };
 
@@ -29,6 +47,7 @@ public class Block : MonoBehaviour
     public event ClickBlockHandler onBlockClicked;
 
     private BlockType type = BlockType.Straight;
+    private ShapeMode shapeMode = ShapeMode.Square;
 
     [SerializeField]
     public Sprite[] sprites;
@@ -48,11 +67,51 @@ public class Block : MonoBehaviour
         var vec = new Vector3(1, 0, 0);
     }
 
-    private void GenerateDirections()
+    private void HexagonDirections()
     {
-        PossibleDirections.Clear();
         switch (type)
         {
+            case BlockType.Hex_cross:
+                PossibleDirections.Add(Vector3.left);
+                PossibleDirections.Add(Vector3.right);
+                PossibleDirections.Add(Vector3.up + Vector3.left);
+                PossibleDirections.Add(Vector3.down + Vector3.left);
+                PossibleDirections.Add(Vector3.up + Vector3.right);
+                PossibleDirections.Add(Vector3.down + Vector3.right);
+                break;
+            case BlockType.Hex_J_road:
+                PossibleDirections.Add(Vector3.right);
+                PossibleDirections.Add(Vector3.down + Vector3.right);
+                break;
+            case BlockType.Hex_straight:
+                PossibleDirections.Add(Vector3.left);
+                PossibleDirections.Add(Vector3.right);
+                break;
+            case BlockType.Hex_W_road:
+                PossibleDirections.Add(Vector3.right);
+                PossibleDirections.Add(Vector3.down + Vector3.left);
+                PossibleDirections.Add(Vector3.down + Vector3.right);
+                break;
+            case BlockType.Hex_X_road:
+                PossibleDirections.Add(Vector3.up + Vector3.left);
+                PossibleDirections.Add(Vector3.down + Vector3.left);
+                PossibleDirections.Add(Vector3.up + Vector3.right);
+                PossibleDirections.Add(Vector3.down + Vector3.right);
+                break;
+            case BlockType.Hex_Y_road:
+                PossibleDirections.Add(Vector3.right);
+                PossibleDirections.Add(Vector3.up + Vector3.left);
+                PossibleDirections.Add(Vector3.down + Vector3.right);
+                break;
+        }
+
+    }
+
+    private void SquareDirections()
+    {
+        switch (type)
+        {
+            // Square types
             case BlockType.Straight:
                 PossibleDirections.Add(Vector3.up);
                 PossibleDirections.Add(Vector3.down);
@@ -71,6 +130,24 @@ public class Block : MonoBehaviour
                 PossibleDirections.Add(Vector3.left);
                 PossibleDirections.Add(Vector3.up);
                 PossibleDirections.Add(Vector3.down);
+                break;
+        }
+    }
+
+    private void GenerateDirections()
+    {
+        PossibleDirections.Clear();
+        switch (shapeMode)
+        {
+            case ShapeMode.Triangle:
+                break;
+            case ShapeMode.Square:
+                SquareDirections();
+                break;
+            case ShapeMode.Hexa:
+                HexagonDirections();
+                break;
+            case ShapeMode.Octo:
                 break;
         }
 
@@ -97,7 +174,7 @@ public class Block : MonoBehaviour
         }
     }
 
-    public void SetType(BlockType newType)
+    public void SetType(BlockType newType, ShapeMode shape = ShapeMode.Square)
     {
         type = newType;
         spriteRenderer = gameObject.GetComponent(typeof(SpriteRenderer)) as SpriteRenderer;
