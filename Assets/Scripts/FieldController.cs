@@ -144,25 +144,25 @@ public class FieldShiftHandler : InputHandler
         {
             // Move up
             var toMove = GameArray.Where(pair => pair.Key.x == SelectedBlock.Key.x).OrderBy(pair => pair.Key.y).Reverse();
-            return Shift(toMove, new Vector3(0, 1));
+            return Shift(toMove, Vector3.up);
         }
         else if (Input.GetKeyUp(KeyCode.S))
         {
             // Move down
             var toMove = GameArray.Where(pair => pair.Key.x == SelectedBlock.Key.x).OrderBy(pair => pair.Key.y);
-            return Shift(toMove, new Vector3(0, -1));
+            return Shift(toMove, Vector3.down);
         }
         else if (Input.GetKeyUp(KeyCode.A))
         {
             // Move left
             var toMove = GameArray.Where(pair => pair.Key.y == SelectedBlock.Key.y).OrderBy(pair => pair.Key.x);
-            return Shift(toMove, new Vector3(-1, 0));
+            return Shift(toMove, Vector3.left);
         }
         else if (Input.GetKeyUp(KeyCode.D))
         {
             // Move right
             var toMove = GameArray.Where(pair => pair.Key.y == SelectedBlock.Key.y).OrderBy(pair => pair.Key.x).Reverse();
-            return Shift(toMove, new Vector3(1, 0));
+            return Shift(toMove, Vector3.right);
         }
         else if (Input.GetKeyUp(KeyCode.Q))
         {
@@ -173,7 +173,7 @@ public class FieldShiftHandler : InputHandler
             var first = SelectedBlock;
             var last = SelectedBlock;
             var toMove = GetDiagonale(true, false, out first, out last);
-            return Shift(toMove, new Vector3(-1, 1), first, last);
+            return Shift(toMove, Vector3.up + Vector3.left, first, last);
         }
         else if (Input.GetKeyUp(KeyCode.C))
         {
@@ -184,7 +184,7 @@ public class FieldShiftHandler : InputHandler
             var first = SelectedBlock;
             var last = SelectedBlock;
             var toMove = GetDiagonale(false, true, out first, out last);
-            return Shift(toMove, new Vector3(1, -1), first, last);
+            return Shift(toMove, Vector3.down + Vector3.right, first, last);
         }
         else if (Input.GetKeyUp(KeyCode.E))
         {
@@ -195,7 +195,7 @@ public class FieldShiftHandler : InputHandler
             var first = SelectedBlock;
             var last = SelectedBlock;
             var toMove = GetDiagonale(true, true, out first, out last);
-            return Shift(toMove, new Vector3(1, 1), first, last);
+            return Shift(toMove, Vector3.up + Vector3.right, first, last);
         }
         else if (Input.GetKeyUp(KeyCode.Z))
         {
@@ -206,7 +206,7 @@ public class FieldShiftHandler : InputHandler
             var first = SelectedBlock;
             var last = SelectedBlock;
             var toMove = GetDiagonale(false, false, out first, out last);
-            return Shift(toMove, new Vector3(-1, -1), first, last);
+            return Shift(toMove, Vector3.down + Vector3.left, first, last);
         }
         return false;
     }
@@ -327,3 +327,4 @@ public class BlockRotationHandler : InputHandler
         SelectedBlock = new KeyValuePair<Vector3, GameObject>(new Vector3(), block);
     }
 }
+
