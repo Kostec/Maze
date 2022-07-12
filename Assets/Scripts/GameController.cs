@@ -60,6 +60,9 @@ public class GameController : MonoBehaviour
 
         GameState = GameState.FieldShifting;
         pathfinder = new Pathfinder();
+
+        var playerBlock = fieldController.GetBlock(new Vector3(0, 0, 0));
+        playerBlock.AttachItem(player);
     }
 
     void MovePlayerToTarget(GameObject player, Vector3 target)
@@ -86,6 +89,8 @@ public class GameController : MonoBehaviour
                 (targetBblock != null && targetBblock.PossibleDirections.Contains(-direction)))
         {
             player.gameObject.transform.position += direction;
+            block.GetComponent<Block>().DetachItem(player.gameObject);
+            targetBblock.GetComponent<Block>().AttachItem(player.gameObject);
         }
     }
 
@@ -117,7 +122,7 @@ public class GameController : MonoBehaviour
 
     private void onLineShifted(IEnumerable<Vector3> line, Vector3 offset)
     {
-        player.transform.position += offset;
+        //player.transform.position += offset;
     }
 
     private void onBlockClicked(GameObject obj)

@@ -53,18 +53,57 @@ public class Block : MonoBehaviour
     public Sprite[] sprites;
     public List<Vector3> PossibleDirections;
     public bool FixedPoint = false;
-    private int angle;
+
+    private List<GameObject> items = new List<GameObject>();
+
+    public Vector3 Position
+    {
+        get
+        {
+            return transform.position;
+        }
+        set
+        {
+            transform.position = value;
+            foreach (var item in items)
+            {
+                item.transform.position += new Vector3(Position.x, Position.y);
+            }
+        }
+    }
 
     // Start is called before the first frame update
     void Start()
     {
-        
+
     }
 
     // Update is called once per frame
     void Update()
     {
-        var vec = new Vector3(1, 0, 0);
+        
+    }
+
+    public Vector3 Shift(Vector3 direction)
+    {
+        Position += direction;
+        return transform.position;
+    }
+
+    public void AttachItem(GameObject item)
+    {
+        if(!items.Contains(item))
+        {
+            items.Add(item);
+        }
+    }
+
+    public void DetachItem(GameObject item)
+    {
+        if (items.Contains(item))
+        {
+            items.Remove(item);
+        }
     }
 
     private void HexagonDirections()
@@ -155,12 +194,12 @@ public class Block : MonoBehaviour
 
     public void Rotate(int angle)
     {
-        this.angle += angle;
-        if (Math.Abs(angle) > 360)
-        {
-            this.angle = 0;
-        }
         transform.Rotate(new Vector3(0.0f, 0.0f, 0.5f), angle);
+        foreach(var item in items)
+        {
+            item.transform.Rotate(new Vector3(0.0f, 0.0f, 0.5f), angle);
+        }
+
         for(int i = 0; i < PossibleDirections.Count; i++)
         {
             var currentDirection = PossibleDirections[i];

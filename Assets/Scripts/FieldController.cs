@@ -250,8 +250,8 @@ public class FieldShiftHandler : InputHandler
     {
         foreach (var movedBlock in toMove)
         {
-            Vector3 newPosition = movedBlock.Key + offset;
-            movedBlock.Value.transform.position = newPosition;
+            Vector3 newPosition = movedBlock.Value.GetComponent<Block>().Shift(offset);
+            //movedBlock.Value.transform.position = newPosition;
             if (GameArray.ContainsKey(newPosition))
             {
                 GameArray[newPosition] = movedBlock.Value;
@@ -262,10 +262,10 @@ public class FieldShiftHandler : InputHandler
     private void SwapBufferBlock(GameObject toBuffer, Vector3 newBufferLocation)
     {
         // Move and update buffer
-        BufferBlock.transform.position = newBufferLocation;
+        BufferBlock.GetComponent<Block>().Position = newBufferLocation;
         GameArray[newBufferLocation] = BufferBlock;
         BufferBlock = toBuffer;
-        BufferBlock.transform.position = bufferPosition;
+        BufferBlock.GetComponent<Block>().Position = bufferPosition;
         // Reset selected block
         SelectedBlock = new KeyValuePair<Vector3, GameObject>();
     }
