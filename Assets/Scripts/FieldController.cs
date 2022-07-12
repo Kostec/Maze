@@ -13,7 +13,7 @@ public class FieldController : MonoBehaviour
     [SerializeField]
     public uint width = 7;
     [SerializeField]
-    public ShapeMode shapeMode = ShapeMode.Square;
+    public ShapeMode shapeMode = ShapeMode.Hexa;
     [SerializeField]
     public GameObject blockPrefab;
 
@@ -39,7 +39,7 @@ public class FieldController : MonoBehaviour
         gameArray = new Dictionary<Vector3, GameObject>();
         GenerateBlocks();
         fieldShiftHandler = new FieldShiftHandler(gameArray, bufferPosition, bufferBlock);
-        blockRotationHandler = new BlockRotationHandler(bufferBlock);
+        blockRotationHandler = new BlockRotationHandler(bufferBlock, shapeMode);
         inputHandler = fieldShiftHandler;
         fieldShiftHandler.OnLineShifted += OnLineShifted;
     }
@@ -83,8 +83,23 @@ public class FieldController : MonoBehaviour
         GameObject currentBlock = Instantiate(blockPrefab, position, Quaternion.identity);
         Block obj = currentBlock.GetComponent<Block>();
         obj.FixedPoint = FixedPoints.Contains(position);
-        obj.SetType((BlockType)UnityEngine.Random.Range(0, 4));
-        obj.Rotate(90 * UnityEngine.Random.Range(0, 3));
+
+        switch (shapeMode)
+        {
+            case ShapeMode.Triangle:
+                break;
+            case ShapeMode.Square:
+                obj.SetType((BlockType)UnityEngine.Random.Range(0, 4), shapeMode);
+                obj.Rotate(Block.RotateAngle[shapeMode] * UnityEngine.Random.Range(0, 3));
+                break;
+            case ShapeMode.Hexa:
+                obj.SetType((BlockType)UnityEngine.Random.Range(4, 10), shapeMode);
+                obj.Rotate(Block.RotateAngle[shapeMode] * UnityEngine.Random.Range(0, 6));
+                break;
+            case ShapeMode.Octo:
+                break;
+        }
+
         obj.onBlockClicked += onBlockClicked;
         return currentBlock;
     }
@@ -311,10 +326,12 @@ public class FieldShiftHandler : InputHandler
 public class BlockRotationHandler : InputHandler
 {
     public KeyValuePair<Vector3, GameObject> SelectedBlock { get; set; }
+    private ShapeMode ShapeMode { get; set; }
 
-    public BlockRotationHandler(GameObject selectedBlock)
+    public BlockRotationHandler(GameObject selectedBlock, ShapeMode shapeMode)
     {
         SelectedBlock = new KeyValuePair<Vector3, GameObject>(new Vector3(), selectedBlock);
+        ShapeMode = shapeMode;
     }
 
     public bool KeyCheck()
@@ -323,14 +340,14 @@ public class BlockRotationHandler : InputHandler
         if (Input.GetKeyUp(KeyCode.D))
         {
             Block _block = SelectedBlock.Value.GetComponent<Block>();
-            _block.Rotate(-90);
+            _block.Rotate(-Block.RotateAngle[ShapeMode]);
             //SelectedBlock.Value.transform.Rotate(new Vector3(0.0f, 0.0f, 0.5f), -90);
             return false;
         }
         else if (Input.GetKeyUp(KeyCode.A))
         {
             Block _block = SelectedBlock.Value.GetComponent<Block>();
-            _block.Rotate(90);
+            _block.Rotate(Block.RotateAngle[ShapeMode]);
             //SelectedBlock.Value.transform.Rotate(new Vector3(0.0f, 0.0f, 0.5f), 90);
             return false;
         }

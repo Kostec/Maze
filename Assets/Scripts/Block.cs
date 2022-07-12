@@ -43,6 +43,14 @@ public delegate void ClickBlockHandler(GameObject obj);
 
 public class Block : MonoBehaviour
 {
+    public static Dictionary<ShapeMode, int> RotateAngle = new Dictionary<ShapeMode, int>()
+    {
+        {ShapeMode.Triangle, 60 },
+        {ShapeMode.Square, 90 },
+        {ShapeMode.Hexa, 60 },
+        {ShapeMode.Octo, 45 },
+    };
+
     private SpriteRenderer spriteRenderer;
     public event ClickBlockHandler onBlockClicked;
 
@@ -209,13 +217,14 @@ public class Block : MonoBehaviour
             float oldY = currentDirection.y;
             currentDirection.x = (int)Math.Round(oldX * cs - oldY * sn);
             currentDirection.y = (int)Math.Round(oldX * sn + oldY * cs);
-            PossibleDirections[i] = currentDirection.normalized;
+            PossibleDirections[i] = currentDirection;
         }
     }
 
     public void SetType(BlockType newType, ShapeMode shape = ShapeMode.Square)
     {
         type = newType;
+        shapeMode = shape;
         spriteRenderer = gameObject.GetComponent(typeof(SpriteRenderer)) as SpriteRenderer;
         spriteRenderer.sprite = sprites[(int)type];
         GenerateDirections();
