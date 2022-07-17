@@ -1,4 +1,6 @@
 using Assets.Scripts;
+using Assets.Scripts.Servers;
+using Assets.Scripts.Servers.Interfaces;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -12,7 +14,6 @@ public enum GameState : uint
     BlockRotate,
     PlayerMoving
 }
-
 
 public class GameController : MonoBehaviour
 {
@@ -43,6 +44,7 @@ public class GameController : MonoBehaviour
 
     GameObject player;
     private Pathfinder pathfinder;
+    public static IServerWrapper serverWrapper = new DummyServer();
 
     // Start is called before the first frame update
     void Start()
@@ -53,7 +55,6 @@ public class GameController : MonoBehaviour
 
         fieldController.finishCurrentState += FinishCurrentState;
         fieldController.onBlockClickedEvent += onBlockClicked;
-        fieldController.OnLineShiftedEvent += onLineShifted;
         onGameStateChanged += fieldController.onGameStateChanged;
         onGameStateChanged += _player.onGameStateChanged;
         _player.finishCurrentState += FinishCurrentState;
@@ -106,11 +107,6 @@ public class GameController : MonoBehaviour
                 break;
         }
         Debug.Log($"GameState: {gameState}");
-    }
-
-    private void onLineShifted(IEnumerable<Vector3> line, Vector3 offset)
-    {
-        
     }
 
     private void onBlockClicked(GameObject obj)

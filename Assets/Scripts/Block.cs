@@ -5,66 +5,25 @@ using UnityEngine.EventSystems;
 using System.IO;
 using UnityEngine;
 using Assets.Scripts;
-
-public enum BlockType
-{
-    // Square
-    Straight, // Прямо
-    Turn, // Поворот
-    Crossroad_T, // Т-образный перекрёсток
-    Crossroad, // перекрёсток
-    // Hexagon
-    Hex_cross,
-    Hex_J_road,
-    Hex_straight,
-    Hex_W_road,
-    Hex_X_road,
-    Hex_Y_road,
-}
-
-public enum HexType
-{
-    Hex_cross,
-    Hex_J_road,
-    Hex_straight,
-    Hex_W_road,
-    Hex_X_road,
-    Hex_Y_road,
-}
-
-public enum ShapeMode
-{
-    Triangle,
-    Square,
-    Hexa,
-    Octo
-};
+using Assets.Scripts.Servers.Items;
 
 public delegate void ClickBlockHandler(GameObject obj);
 
-public class Block : MonoBehaviour, IFieldItem
+public class Block : MonoBehaviour, IBlock
 {
-    public static Dictionary<ShapeMode, int> RotateAngle = new Dictionary<ShapeMode, int>()
-    {
-        {ShapeMode.Triangle, 60 },
-        {ShapeMode.Square, 90 },
-        {ShapeMode.Hexa, 60 },
-        {ShapeMode.Octo, 45 },
-    };
-
     private SpriteRenderer spriteRenderer;
     public event ClickBlockHandler onBlockClicked;
     public event FieldItemShifted ItemShifted;
     public event FieldItemRotated ItemRotated;
     public event FieldPositionChanged ItemPositionChanged;
 
-    private BlockType type = BlockType.Straight;
-    private ShapeMode shapeMode = ShapeMode.Square;
+    public BlockType type { get; private set; } = BlockType.Straight;
+    public ShapeMode shapeMode { get; private set; } = ShapeMode.Square;
 
     [SerializeField]
     public Sprite[] sprites;
-    public List<Vector3> PossibleDirections;
-    public bool FixedPoint = false;
+    public List<Vector3> PossibleDirections { get; set; } = new List<Vector3>();
+    public bool FixedPoint { get; set; } = false;
 
     private List<GameObject> items = new List<GameObject>();
 
@@ -97,106 +56,14 @@ public class Block : MonoBehaviour, IFieldItem
         
     }
 
-    public void AttachItem(GameObject item)
+    public void Init(IBlock block)
     {
-        if(!items.Contains(item))
-        {
-            items.Add(item);
-        }
-    }
-
-    public void DetachItem(GameObject item)
-    {
-        if (items.Contains(item))
-        {
-            items.Remove(item);
-        }
-    }
-
-    private void HexagonDirections()
-    {
-        switch (type)
-        {
-            case BlockType.Hex_cross:
-                PossibleDirections.Add(Vector3.left);
-                PossibleDirections.Add(Vector3.right);
-                PossibleDirections.Add(Vector3.up + Vector3.left);
-                PossibleDirections.Add(Vector3.down + Vector3.left);
-                PossibleDirections.Add(Vector3.up + Vector3.right);
-                PossibleDirections.Add(Vector3.down + Vector3.right);
-                break;
-            case BlockType.Hex_J_road:
-                PossibleDirections.Add(Vector3.right);
-                PossibleDirections.Add(Vector3.down + Vector3.right);
-                break;
-            case BlockType.Hex_straight:
-                PossibleDirections.Add(Vector3.left);
-                PossibleDirections.Add(Vector3.right);
-                break;
-            case BlockType.Hex_W_road:
-                PossibleDirections.Add(Vector3.right);
-                PossibleDirections.Add(Vector3.down + Vector3.left);
-                PossibleDirections.Add(Vector3.down + Vector3.right);
-                break;
-            case BlockType.Hex_X_road:
-                PossibleDirections.Add(Vector3.up + Vector3.left);
-                PossibleDirections.Add(Vector3.down + Vector3.left);
-                PossibleDirections.Add(Vector3.up + Vector3.right);
-                PossibleDirections.Add(Vector3.down + Vector3.right);
-                break;
-            case BlockType.Hex_Y_road:
-                PossibleDirections.Add(Vector3.right);
-                PossibleDirections.Add(Vector3.up + Vector3.left);
-                PossibleDirections.Add(Vector3.down + Vector3.right);
-                break;
-        }
-
-    }
-
-    private void SquareDirections()
-    {
-        switch (type)
-        {
-            // Square types
-            case BlockType.Straight:
-                PossibleDirections.Add(Vector3.up);
-                PossibleDirections.Add(Vector3.down);
-                break;
-            case BlockType.Turn:
-                PossibleDirections.Add(Vector3.right);
-                PossibleDirections.Add(Vector3.down);
-                break;
-            case BlockType.Crossroad_T:
-                PossibleDirections.Add(Vector3.right);
-                PossibleDirections.Add(Vector3.left);
-                PossibleDirections.Add(Vector3.down);
-                break;
-            case BlockType.Crossroad:
-                PossibleDirections.Add(Vector3.right);
-                PossibleDirections.Add(Vector3.left);
-                PossibleDirections.Add(Vector3.up);
-                PossibleDirections.Add(Vector3.down);
-                break;
-        }
-    }
-
-    private void GenerateDirections()
-    {
-        PossibleDirections.Clear();
-        switch (shapeMode)
-        {
-            case ShapeMode.Triangle:
-                break;
-            case ShapeMode.Square:
-                SquareDirections();
-                break;
-            case ShapeMode.Hexa:
-                HexagonDirections();
-                break;
-            case ShapeMode.Octo:
-                break;
-        }
-
+        Position = block.Position;
+        type = block.type;
+        shapeMode = block.shapeMode;
+        spriteRenderer = gameObject.GetComponent(typeof(SpriteRenderer)) as SpriteRenderer;
+        spriteRenderer.sprite = sprites[(int)type];
+        PossibleDirections = block.PossibleDirections;
     }
 
     public void Rotate(int angle)
@@ -219,15 +86,6 @@ public class Block : MonoBehaviour, IFieldItem
             PossibleDirections[i] = currentDirection;
         }
         ItemRotated?.Invoke(this, angle);
-    }
-
-    public void SetType(BlockType newType, ShapeMode shape = ShapeMode.Square)
-    {
-        type = newType;
-        shapeMode = shape;
-        spriteRenderer = gameObject.GetComponent(typeof(SpriteRenderer)) as SpriteRenderer;
-        spriteRenderer.sprite = sprites[(int)type];
-        GenerateDirections();
     }
 
     private void OnMouseDown()
