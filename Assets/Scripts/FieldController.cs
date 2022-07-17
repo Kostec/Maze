@@ -84,22 +84,25 @@ public class FieldController : MonoBehaviour
         Block obj = currentBlock.GetComponent<Block>();
         obj.FixedPoint = FixedPoints.Contains(position);
 
+        BlockType blockType = BlockType.Crossroad;
+        int angle = 0;
         switch (shapeMode)
         {
             case ShapeMode.Triangle:
                 break;
             case ShapeMode.Square:
-                obj.SetType((BlockType)UnityEngine.Random.Range(0, 4), shapeMode);
-                obj.Rotate(Block.RotateAngle[shapeMode] * UnityEngine.Random.Range(0, 3));
+                blockType = (BlockType)UnityEngine.Random.Range(0, 4); ;
+                angle = Block.RotateAngle[shapeMode] * UnityEngine.Random.Range(0, 3);
                 break;
             case ShapeMode.Hexa:
-                obj.SetType((BlockType)UnityEngine.Random.Range(4, 10), shapeMode);
-                obj.Rotate(Block.RotateAngle[shapeMode] * UnityEngine.Random.Range(0, 6));
+                blockType = (BlockType)UnityEngine.Random.Range(4, 10);
+                angle = Block.RotateAngle[shapeMode] * UnityEngine.Random.Range(0, 6);
                 break;
             case ShapeMode.Octo:
                 break;
         }
-
+        obj.SetType(blockType, shapeMode);
+        obj.Rotate(angle);
         obj.onBlockClicked += onBlockClicked;
         return currentBlock;
     }
@@ -265,8 +268,8 @@ public class FieldShiftHandler : InputHandler
     {
         foreach (var movedBlock in toMove)
         {
-            Vector3 newPosition = movedBlock.Value.GetComponent<Block>().Shift(offset);
-            //movedBlock.Value.transform.position = newPosition;
+            movedBlock.Value.GetComponent<Block>().Shift(offset);
+            Vector3 newPosition = movedBlock.Value.GetComponent<Block>().Position;
             if (GameArray.ContainsKey(newPosition))
             {
                 GameArray[newPosition] = movedBlock.Value;
@@ -341,14 +344,12 @@ public class BlockRotationHandler : InputHandler
         {
             Block _block = SelectedBlock.Value.GetComponent<Block>();
             _block.Rotate(-Block.RotateAngle[ShapeMode]);
-            //SelectedBlock.Value.transform.Rotate(new Vector3(0.0f, 0.0f, 0.5f), -90);
             return false;
         }
         else if (Input.GetKeyUp(KeyCode.A))
         {
             Block _block = SelectedBlock.Value.GetComponent<Block>();
             _block.Rotate(Block.RotateAngle[ShapeMode]);
-            //SelectedBlock.Value.transform.Rotate(new Vector3(0.0f, 0.0f, 0.5f), 90);
             return false;
         }
         else if (Input.GetKeyUp(KeyCode.F))

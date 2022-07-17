@@ -1,9 +1,10 @@
+using Assets.Scripts;
 using System;
 using UnityEngine;
 
 public delegate void PlayerMoving(Player player, Vector3 direction);
 
-public class Player : MonoBehaviour
+public class Player : MonoBehaviour, IFieldItem
 {
     public enum PlayerType
     {
@@ -19,15 +20,32 @@ public class Player : MonoBehaviour
     public EventHandler finishCurrentState;
 
     public event PlayerMoving onPlayerMoving;
+    public event FieldItemShifted ItemShifted;
+    public event FieldItemRotated ItemRotated;
+    public event FieldPositionChanged ItemPositionChanged;
 
     private InputHandler inputhandler;
+    private IFieldItem baseItem; // Блок на котором стоит игрок
 
     bool playerCanMove;
+
+    public Vector3 Position { 
+        get 
+        {
+            return transform.position;
+        }
+        set 
+        {
+            Vector3 newPosition = new Vector3(value.x, value.y, -1);
+            transform.position = value;
+            ItemPositionChanged?.Invoke(this, transform.position);
+        } 
+    }
+
     // Start is called before the first frame update
     void Start()
     {
-        PlayerInputHandler playerHandler = new PlayerInputHandler(gameObject);
-        playerHandler.onPlayerTryMoving += TryPlayerMoving;
+        PlayerInputHandler playerHandler = new PlayerInputHandler(this);
         inputhandler = playerHandler;
     }
 
@@ -45,24 +63,62 @@ public class Player : MonoBehaviour
         return inputhandler;
     }
 
-    void TryPlayerMoving(Player player, Vector3 direction)
-    {
-        onPlayerMoving.Invoke(player, direction);
-    }
-
     public void onGameStateChanged(GameState newGameState)
     {
         playerCanMove = newGameState == GameState.PlayerMoving;
+    }
+
+    public void Shift(Vector3 direction)
+    {
+
+    }
+
+    public void Rotate(int angle)
+    {
+        ItemRotated?.Invoke(this, angle);
+    }
+
+    public void onBaseItemShifted(IFieldItem sender, Vector3 direction)
+    {
+        Shift(direction);
+    }
+
+    public void onBaseItemRotated(IFieldItem sender, int angle)
+    {
+        Rotate(angle);
+    }
+
+    public void onBaseItemPositionChanged(IFieldItem sender, Vector3 newPosition)
+    {
+        Position = newPosition;
+    }
+
+    public void SetBaseItem(IFieldItem baseItem)
+    {
+        if(this.baseItem != null)
+        {
+            this.baseItem.ItemShifted -= onBaseItemShifted;
+            this.baseItem.ItemRotated -= onBaseItemRotated;
+            this.baseItem.ItemPositionChanged -= onBaseItemPositionChanged;
+        }
+        if(baseItem != null)
+        {
+            this.baseItem = baseItem;
+            this.baseItem.ItemShifted += onBaseItemShifted;
+            this.baseItem.ItemRotated += onBaseItemRotated;
+            this.baseItem.ItemPositionChanged += onBaseItemPositionChanged;
+            Position = this.baseItem.Position;
+        }
     }
 }
 
 public class PlayerInputHandler : InputHandler
 {
-    private GameObject player;
+    private IFieldItem player;
 
     public event PlayerMoving onPlayerTryMoving;
 
-    public PlayerInputHandler(GameObject player)
+    public PlayerInputHandler(IFieldItem player)
     {
         this.player = player;
     }

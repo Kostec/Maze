@@ -1,3 +1,4 @@
+using Assets.Scripts;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -49,7 +50,6 @@ public class GameController : MonoBehaviour
         Vector3 playerSpawnPosition = new Vector3(0, 0, -1);
         player = Instantiate(playerPrefab, playerSpawnPosition, Quaternion.identity);
         Player _player = player.GetComponent<Player>();
-        _player.onPlayerMoving += PlayerMoveTo;
 
         fieldController.finishCurrentState += FinishCurrentState;
         fieldController.onBlockClickedEvent += onBlockClicked;
@@ -62,10 +62,10 @@ public class GameController : MonoBehaviour
         pathfinder = new Pathfinder();
 
         var playerBlock = fieldController.GetBlock(new Vector3(0, 0, 0));
-        playerBlock.AttachItem(player);
+        _player.SetBaseItem(playerBlock);
     }
 
-    void MovePlayerToTarget(GameObject player, Vector3 target)
+    void MovePlayerToTarget(Player player, Vector3 target)
     {
         pathfinder.SetField(fieldController.GetFieldArray());
         Vector3 playerPosition = new Vector3(player.transform.position.x, player.transform.position.y);
@@ -77,21 +77,9 @@ public class GameController : MonoBehaviour
         }
         Vector3 newPosition = path.First();
         newPosition.z = -1;
-        player.transform.position = newPosition;
-    }
-
-    void PlayerMoveTo(Player player, Vector3 direction)
-    {
-        Block block = fieldController.GetBlock(player.transform.position);
-        Block targetBblock = fieldController.GetBlock(player.transform.position + direction);
-        direction.Normalize();
-        if ((block != null && block.PossibleDirections.Contains(direction)) &&
-                (targetBblock != null && targetBblock.PossibleDirections.Contains(-direction)))
-        {
-            player.gameObject.transform.position += direction;
-            block.GetComponent<Block>().DetachItem(player.gameObject);
-            targetBblock.GetComponent<Block>().AttachItem(player.gameObject);
-        }
+        player.Position = newPosition;
+        var newBlock = fieldController.GetBlock(newPosition);
+        player.SetBaseItem(newBlock);
     }
 
     // Update is called once per frame
@@ -122,7 +110,7 @@ public class GameController : MonoBehaviour
 
     private void onLineShifted(IEnumerable<Vector3> line, Vector3 offset)
     {
-        //player.transform.position += offset;
+        
     }
 
     private void onBlockClicked(GameObject obj)
@@ -131,7 +119,7 @@ public class GameController : MonoBehaviour
 
         if(GameState == GameState.PlayerMoving)
         {
-            MovePlayerToTarget(player, block.transform.position);
+            MovePlayerToTarget(player.GetComponent<Player>(), block.transform.position);
         }
     }
 }

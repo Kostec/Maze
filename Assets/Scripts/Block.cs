@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine.EventSystems;
 using System.IO;
 using UnityEngine;
+using Assets.Scripts;
 
 public enum BlockType
 {
@@ -41,7 +42,7 @@ public enum ShapeMode
 
 public delegate void ClickBlockHandler(GameObject obj);
 
-public class Block : MonoBehaviour
+public class Block : MonoBehaviour, IFieldItem
 {
     public static Dictionary<ShapeMode, int> RotateAngle = new Dictionary<ShapeMode, int>()
     {
@@ -53,6 +54,9 @@ public class Block : MonoBehaviour
 
     private SpriteRenderer spriteRenderer;
     public event ClickBlockHandler onBlockClicked;
+    public event FieldItemShifted ItemShifted;
+    public event FieldItemRotated ItemRotated;
+    public event FieldPositionChanged ItemPositionChanged;
 
     private BlockType type = BlockType.Straight;
     private ShapeMode shapeMode = ShapeMode.Square;
@@ -73,6 +77,7 @@ public class Block : MonoBehaviour
         set
         {
             transform.position = value;
+            ItemPositionChanged?.Invoke(this, Position);
             foreach (var item in items)
             {
                 item.transform.position += new Vector3(Position.x, Position.y);
@@ -90,12 +95,6 @@ public class Block : MonoBehaviour
     void Update()
     {
         
-    }
-
-    public Vector3 Shift(Vector3 direction)
-    {
-        Position += direction;
-        return transform.position;
     }
 
     public void AttachItem(GameObject item)
@@ -219,6 +218,7 @@ public class Block : MonoBehaviour
             currentDirection.y = (int)Math.Round(oldX * sn + oldY * cs);
             PossibleDirections[i] = currentDirection;
         }
+        ItemRotated?.Invoke(this, angle);
     }
 
     public void SetType(BlockType newType, ShapeMode shape = ShapeMode.Square)
@@ -235,4 +235,29 @@ public class Block : MonoBehaviour
         onBlockClicked(gameObject);
     }
 
+    public void Shift(Vector3 direction)
+    {
+        Position += direction;
+        ItemShifted?.Invoke(this, direction);
+    }
+
+    public void onBaseItemShifted(IFieldItem sender, Vector3 direction)
+    {
+        
+    }
+
+    public void onBaseItemRotated(IFieldItem sender, int angle)
+    {
+        
+    }
+
+    public void onBaseItemPositionChanged(IFieldItem sender, Vector3 newPosition)
+    {
+        
+    }
+
+    public void SetBaseItem(IFieldItem baseItem)
+    {
+        
+    }
 }
