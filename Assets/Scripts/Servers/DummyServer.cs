@@ -12,12 +12,13 @@ namespace Assets.Scripts.Servers
     /// </summary>
     public class DummyServer: IServerWrapper
     {
-        Controllers.FieldControllers.ShiftController shiftController;
-        FieldGenerator fieldGenerator;
-        List<Player> players = new List<Player>();
-        Dictionary<Vector3, IBlock> field = new Dictionary<Vector3, IBlock>();
-        Vector3 bufferPosition = new Vector3(-1, -1, 0);
-        IBlock bufferBlock;
+        private ShiftController shiftController;
+        private FieldGenerator fieldGenerator;
+        private List<IPlayer> players = new List<IPlayer>();
+        private Dictionary<Vector3, IBlock> field = new Dictionary<Vector3, IBlock>();
+        private Vector3 bufferPosition = new Vector3(-1, -1, 0);
+        private IBlock bufferBlock;
+        private List<Vector3> playerSpawnPositions = new List<Vector3>();
         public DummyServer()
         {
             fieldGenerator = new FieldGenerator();
@@ -31,7 +32,13 @@ namespace Assets.Scripts.Servers
         {
             field = fieldGenerator.GenerateField(width, heigth, shapeMode);
             bufferBlock = field[bufferPosition];
-            shiftController = new Controllers.FieldControllers.ShiftController(field, bufferPosition, bufferBlock);
+            shiftController = new ShiftController(field, bufferPosition, bufferBlock);
+
+            playerSpawnPositions.Add(new Vector3(0, 0));
+            playerSpawnPositions.Add(new Vector3(0, heigth-1));
+            playerSpawnPositions.Add(new Vector3(width-1, 0));
+            playerSpawnPositions.Add(new Vector3(width-1, heigth-1));
+
             return field;
         }
 
@@ -74,6 +81,16 @@ namespace Assets.Scripts.Servers
             bool res = false;
             return res;
         }
-        
+
+        public IPlayer CreatePlayer(string name, PlayerType type)
+        {
+            if (players.Count < IServerWrapper.MaximumPlayerCount)
+            {
+                IPlayer player = new ServerPlayer(name, type, playerSpawnPositions[players.Count]);
+                players.Add(player);
+                return player;
+            }
+            return null;
+        }
     }
 }

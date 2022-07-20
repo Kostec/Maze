@@ -1,23 +1,16 @@
 using Assets.Scripts;
+using Assets.Scripts.Servers.Interfaces;
 using System;
 using UnityEngine;
 
 public delegate void PlayerMoving(Player player, Vector3 direction);
 
-public class Player : MonoBehaviour, IFieldItem
+public class Player : MonoBehaviour, IPlayer, IFieldItem
 {
-    public enum PlayerType
-    {
-        NPC,
-        Human
-    }
-
-    [SerializeField]
-    public string playerName;
-    [SerializeField]
-    public PlayerType playerType;
-
     public EventHandler finishCurrentState;
+    public uint Id { get; private set; }
+    public string Name { get; private set; }
+    public PlayerType Type { get; private set; }
 
     public event PlayerMoving onPlayerMoving;
     public event FieldItemShifted ItemShifted;
@@ -40,6 +33,19 @@ public class Player : MonoBehaviour, IFieldItem
             transform.position = value;
             ItemPositionChanged?.Invoke(this, transform.position);
         } 
+    }
+    public Vector3 InitalPosition { get; private set; }
+
+    public bool isActive { get; set; }
+
+    public void Init(IPlayer player)
+    {
+        Id = player.Id;
+        Name = player.Name;
+        Type = player.Type;
+        InitalPosition = player.InitalPosition;
+        Position = InitalPosition;
+        isActive = player.isActive;
     }
 
     // Start is called before the first frame update
@@ -65,7 +71,7 @@ public class Player : MonoBehaviour, IFieldItem
 
     public void onGameStateChanged(GameState newGameState)
     {
-        playerCanMove = newGameState == GameState.PlayerMoving;
+        playerCanMove = isActive && newGameState == GameState.PlayerMoving;
     }
 
     public void Shift(Vector3 direction)

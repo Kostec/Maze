@@ -42,28 +42,39 @@ public class GameController : MonoBehaviour
     public delegate void GameStateEventHandler(GameState newgameState);
     public event GameStateEventHandler onGameStateChanged;
 
-    GameObject player;
-    private Pathfinder pathfinder;
+    private List<Player> players = new List<Player>();
+    private int activePlayerCount = -1;
+    private Player activePlayer = null;
+    private Pathfinder pathfinder = new Pathfinder();
     public static IServerWrapper serverWrapper = new DummyServer();
 
     // Start is called before the first frame update
     void Start()
     {
-        Vector3 playerSpawnPosition = new Vector3(0, 0, -1);
-        player = Instantiate(playerPrefab, playerSpawnPosition, Quaternion.identity);
-        Player _player = player.GetComponent<Player>();
-
         fieldController.finishCurrentState += FinishCurrentState;
         fieldController.onBlockClickedEvent += onBlockClicked;
         onGameStateChanged += fieldController.onGameStateChanged;
-        onGameStateChanged += _player.onGameStateChanged;
-        _player.finishCurrentState += FinishCurrentState;
 
         GameState = GameState.FieldShifting;
-        pathfinder = new Pathfinder();
 
-        var playerBlock = fieldController.GetBlock(new Vector3(0, 0, 0));
-        _player.SetBaseItem(playerBlock);
+        for (int i = 0; i < 4; i++)
+        {
+            IPlayer serverPlayer = serverWrapper.CreatePlayer($"Player {i + 1}", PlayerType.Human);
+            if (serverPlayer == null)
+            {
+                break;
+            }
+            GameObject player = Instantiate(playerPrefab, serverPlayer.InitalPosition, Quaternion.identity);
+            Player _player = player.GetComponent<Player>();
+            _player.Init(serverPlayer);
+
+            onGameStateChanged += _player.onGameStateChanged;
+            _player.finishCurrentState += FinishCurrentState;
+
+            var playerBlock = fieldController.GetBlock(_player.Position);
+            _player.SetBaseItem(playerBlock);
+            players.Add(_player);
+        }
     }
 
     void MovePlayerToTarget(Player player, Vector3 target)
@@ -97,6 +108,17 @@ public class GameController : MonoBehaviour
                 GameState = GameState.BlockRotate;
                 break;
             case GameState.BlockRotate:
+                activePlayerCount++;
+                if(activePlayerCount >= IServerWrapper.MaximumPlayerCount)
+                {
+                    activePlayerCount = 0;
+                }
+                if (activePlayer != null)
+                {
+                    activePlayer.isActive = false;
+                }
+                activePlayer = players[activePlayerCount];
+                activePlayer.isActive = true;
                 GameState = GameState.PlayerMoving;
                 break;
             case GameState.PlayerMoving:
@@ -115,7 +137,7 @@ public class GameController : MonoBehaviour
 
         if(GameState == GameState.PlayerMoving)
         {
-            MovePlayerToTarget(player.GetComponent<Player>(), block.transform.position);
+            MovePlayerToTarget(activePlayer, block.transform.position);
         }
     }
 }

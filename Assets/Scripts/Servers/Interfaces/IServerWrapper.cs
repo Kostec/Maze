@@ -33,10 +33,12 @@ namespace Assets.Scripts.Servers.Interfaces
     /// </summary
     public interface IServerWrapper
     {
+        static uint MaximumPlayerCount = 4;
         ShiftResponse ShiftLine(IBlock baseBlock, Vector3 direction);
         RotateResponse RotateBlock(IBlock block, RotateSide side);
         bool MovePlayerToTarget(Player player, Vector3 target);
         bool PlayerPutCard(Player player, IFieldItem card);
         Dictionary<Vector3, IBlock> GenerateField(uint width, uint heigth, ShapeMode shapeMode);
+        IPlayer CreatePlayer(string name, PlayerType type);
     }
 }
