@@ -35,12 +35,8 @@ public class Block : MonoBehaviour, IBlock
         }
         set
         {
-            transform.position = value;
+            transform.position = new Vector3(value.x, value.y, 0);
             ItemPositionChanged?.Invoke(this, Position);
-            foreach (var item in items)
-            {
-                item.transform.position += new Vector3(Position.x, Position.y);
-            }
         }
     }
 
