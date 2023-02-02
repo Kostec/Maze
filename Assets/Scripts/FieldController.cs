@@ -17,10 +17,25 @@ public class FieldController : MonoBehaviour
     [SerializeField]
     public GameObject blockPrefab;
 
+    /// <summary>
+    /// Блок в буфере
+    /// </summary>
     private GameObject bufferBlock;
+    /// <summary>
+    /// Карта поля
+    /// </summary>
     private Dictionary<Vector3, GameObject> gameArray;
+    /// <summary>
+    /// Позиция буферного блока на сцене
+    /// </summary>
     private Vector3 bufferPosition = new Vector3(-1, -1, 0);
+    /// <summary>
+    /// Обработчик ввода (клавиатура, мышь и т.д)
+    /// </summary>
     private InputHandler inputHandler;
+    /// <summary>
+    /// Координаты фиксированных точек на карте поля
+    /// </summary>
     private List<Vector3> FixedPoints = new List<Vector3>() {
         new Vector3(1,1),
         new Vector3(1,5),
@@ -55,12 +70,21 @@ public class FieldController : MonoBehaviour
             }
         }
     }
+
+    /// <summary>
+    /// Возвращает карту поля
+    /// </summary>
+    /// <returns></returns>
     public Dictionary<Vector3, Block> GetFieldArray()
     {
         Dictionary<Vector3, Block> dict = gameArray.ToDictionary(p => p.Key, p => p.Value.GetComponent<Block>());
         return dict;
     }
    
+    /// <summary>
+    /// Обработка клика на объект (блок)
+    /// </summary>
+    /// <param name="blockClicked"></param>
     private void onBlockClicked(GameObject blockClicked)
     {
         if (inputHandler != blockRotationHandler)
@@ -70,11 +94,23 @@ public class FieldController : MonoBehaviour
             onBlockClickedEvent?.Invoke(blockClicked);
         }
     }
+
+    /// <summary>
+    /// Возвращает блок по позиции из карты поля
+    /// </summary>
+    /// <param name="position"></param>
+    /// <returns></returns>
     public Block GetBlock(Vector3 position)
     {
         position.z = 0;
         return gameArray.ContainsKey(position) ? gameArray[position].GetComponent<Block>() : null;
     }
+
+    /// <summary>
+    /// Создаёт блок
+    /// </summary>
+    /// <param name="block"></param>
+    /// <returns></returns>
     private GameObject CreateBlock(IBlock block)
     {
         GameObject currentBlock = Instantiate(blockPrefab, block.Position, Quaternion.identity);
@@ -86,6 +122,10 @@ public class FieldController : MonoBehaviour
         obj.onBlockClicked += onBlockClicked;
         return currentBlock;
     }
+
+    /// <summary>
+    /// Генерация поля для игры
+    /// </summary>
     private void GenerateBlocks()
     {
         if (gameArray.Count > 0)
@@ -109,6 +149,11 @@ public class FieldController : MonoBehaviour
             gameArray.Add(position, currentBlock);
         }
     }
+
+    /// <summary>
+    /// Обработка изменения состояния игры
+    /// </summary>
+    /// <param name="newGameState">Новое состояние игры</param>
     public void onGameStateChanged(GameState newGameState)
     {
         switch (newGameState)
@@ -133,8 +178,17 @@ public class FieldController : MonoBehaviour
 
 public class FieldShiftHandler : InputHandler
 {
+    /// <summary>
+    /// Буферный блок
+    /// </summary>
     public GameObject BufferBlock { get; set; }
+    /// <summary>
+    /// Карта поля
+    /// </summary>
     public Dictionary<Vector3, GameObject> GameArray;
+    /// <summary>
+    /// Позиция буферного блока
+    /// </summary>
     private Vector3 bufferPosition;
     private KeyValuePair<Vector3, GameObject> SelectedBlock;
     public FieldShiftHandler(Dictionary<Vector3, GameObject> gameArray, Vector3 bufferPosition, GameObject bufferBlock)
@@ -186,6 +240,10 @@ public class FieldShiftHandler : InputHandler
         {
             direction = Vector3.down + Vector3.left;
         }
+        else if (Input.GetKeyUp(KeyCode.F))
+        {
+            return true;
+        }
         if (direction != Vector3.zero)
         {
             var resp = GameController.serverWrapper.ShiftLine(SelectedBlock.Value.GetComponent<Block>(), direction);
@@ -213,6 +271,18 @@ public class FieldShiftHandler : InputHandler
                 popBlock.Position = bufferPosition;
                 BufferBlock.GetComponent<Block>().Position = newBufferPosition;
                 BufferBlock = popBlock.gameObject;
+
+                foreach(var pair in GameArray)
+                {
+                    var pos = pair.Key;
+                    var block = pair.Value;
+
+                    if(pos.x != block.transform.position.x || pos.y != block.transform.position.y)
+                    {
+                        return true;
+                    }
+                }
+
                 return true;
             }
         }
@@ -238,6 +308,7 @@ public class BlockRotationHandler : InputHandler
         
         if (Input.GetKeyUp(KeyCode.D))
         {
+            // Поворот блока на 90 градусов по часовой стрелке
             Block _block = SelectedBlock.Value.GetComponent<Block>();
             var res = GameController.serverWrapper.RotateBlock(_block, RotateSide.Right);
             if (res.success)
@@ -248,6 +319,7 @@ public class BlockRotationHandler : InputHandler
         }
         else if (Input.GetKeyUp(KeyCode.A))
         {
+            // Поворот блока на 90 градусов против часовой стрелке
             Block _block = SelectedBlock.Value.GetComponent<Block>();
             var res = GameController.serverWrapper.RotateBlock(_block, RotateSide.Left);
             if (res.success)
@@ -258,12 +330,16 @@ public class BlockRotationHandler : InputHandler
         }
         else if (Input.GetKeyUp(KeyCode.F))
         {
+            // Завершение поворота
             return true;
         }
 
         return false;
     }
-
+    /// <summary>
+    /// Обработка события захвата выбранного объекта (блока)
+    /// </summary>
+    /// <param name="block"></param>
     public void onObjectSelected(GameObject block)
     {
         SelectedBlock = new KeyValuePair<Vector3, GameObject>(new Vector3(), block);

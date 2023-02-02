@@ -22,7 +22,7 @@ public class GameController : MonoBehaviour
     [SerializeField]
     public FieldController fieldController;
     [SerializeField]
-    public uint playerNumber;
+    public uint playerNumber = 1;
 
     private GameState gameState;
     public GameState GameState { 
@@ -57,7 +57,7 @@ public class GameController : MonoBehaviour
 
         GameState = GameState.FieldShifting;
 
-        for (int i = 0; i < 4; i++)
+        for (int i = 0; i < playerNumber; i++)
         {
             IPlayer serverPlayer = serverWrapper.CreatePlayer($"Player {i + 1}", PlayerType.Human);
             if (serverPlayer == null)

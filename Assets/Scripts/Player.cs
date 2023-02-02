@@ -30,7 +30,7 @@ public class Player : MonoBehaviour, IPlayer, IFieldItem
         set 
         {
             Vector3 newPosition = new Vector3(value.x, value.y, -1);
-            transform.position = value;
+            transform.position = newPosition;
             ItemPositionChanged?.Invoke(this, transform.position);
         } 
     }

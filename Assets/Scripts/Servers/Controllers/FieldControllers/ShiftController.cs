@@ -30,8 +30,8 @@ namespace Assets.Scripts.Servers.Controllers.FieldControllers
             if (direction == Vector3.up)
             {
                 // Move up
-                toMove = field.Where(pair => pair.Key.x == SelectedBlock.Key.x).OrderBy(pair => pair.Key.y);
-                response = Shift(toMove, Vector3.up);
+                toMove = field.Where(pair => pair.Key.x == SelectedBlock.Key.x).OrderBy(pair => pair.Key.y).Reverse();
+                response = Shift(toMove, Vector3.down);
             }
             else if (direction == Vector3.down)
             {
