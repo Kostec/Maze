@@ -15,6 +15,8 @@ namespace Assets.Scripts.Servers.Items
         public List<Vector3> PossibleDirections { get; set; }
         public bool FixedPoint { get; set; } = false;
 
+        public int Angle { private set; get; } = 0;
+
         public event FieldItemShifted ItemShifted;
         public event FieldItemRotated ItemRotated;
         public event FieldPositionChanged ItemPositionChanged;
@@ -138,6 +140,7 @@ namespace Assets.Scripts.Servers.Items
                 currentDirection.y = (int)Math.Round(oldX * sn + oldY * cs);
                 PossibleDirections[i] = currentDirection;
             }
+            Angle += angle;
         }
 
         public void SetBaseItem(IFieldItem baseItem)

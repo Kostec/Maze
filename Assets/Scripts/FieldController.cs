@@ -116,9 +116,7 @@ public class FieldController : MonoBehaviour
         GameObject currentBlock = Instantiate(blockPrefab, block.Position, Quaternion.identity);
         Block obj = currentBlock.GetComponent<Block>();
 
-        int angle = 0;
         obj.Init(block);
-        obj.Rotate(angle);
         obj.onBlockClicked += onBlockClicked;
         return currentBlock;
     }
@@ -305,33 +303,35 @@ public class BlockRotationHandler : InputHandler
 
     public bool KeyCheck()
     {
-        
+        bool isRotated = false;
+        RotateSide rotateSide = RotateSide.Left;
         if (Input.GetKeyUp(KeyCode.D))
         {
-            // ѕоворот блока на 90 градусов по часовой стрелке
-            Block _block = SelectedBlock.Value.GetComponent<Block>();
-            var res = GameController.serverWrapper.RotateBlock(_block, RotateSide.Right);
-            if (res.success)
-            {
-                _block.Rotate(res.angle);
-            }
-            return false;
+            // ѕоворот блока по часовой стрелке
+            rotateSide = RotateSide.Right;
+            isRotated = true;
         }
         else if (Input.GetKeyUp(KeyCode.A))
         {
-            // ѕоворот блока на 90 градусов против часовой стрелке
-            Block _block = SelectedBlock.Value.GetComponent<Block>();
-            var res = GameController.serverWrapper.RotateBlock(_block, RotateSide.Left);
-            if (res.success)
-            {
-                _block.Rotate(res.angle);
-            }
-            return false;
+            // ѕоворот блока против часовой стрелке
+            rotateSide = RotateSide.Left;
+            isRotated = true;
         }
         else if (Input.GetKeyUp(KeyCode.F))
         {
             // «авершение поворота
             return true;
+        }
+
+        if (isRotated)
+        {
+            Block _block = SelectedBlock.Value.GetComponent<Block>();
+            var res = GameController.serverWrapper.RotateBlock(_block, rotateSide);
+            if (res.success)
+            {
+                _block.Rotate(res.angle);
+                _block.PossibleDirections = res.directions.ToList();
+            }
         }
 
         return false;

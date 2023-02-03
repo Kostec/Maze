@@ -50,6 +50,7 @@ namespace Assets.Scripts.Servers.Items
             {ShapeMode.Hexa, 60 },
             {ShapeMode.Octo, 45 },
         };
+        public int Angle { get; }
         public BlockType type { get; }
         public ShapeMode shapeMode { get; }
         public List<Vector3> PossibleDirections { get; set; }

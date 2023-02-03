@@ -16,6 +16,7 @@ public class Block : MonoBehaviour, IBlock
     public event FieldItemShifted ItemShifted;
     public event FieldItemRotated ItemRotated;
     public event FieldPositionChanged ItemPositionChanged;
+    public int Angle { private set; get; }
 
     public BlockType type { get; private set; } = BlockType.Straight;
     public ShapeMode shapeMode { get; private set; } = ShapeMode.Square;
@@ -59,33 +60,30 @@ public class Block : MonoBehaviour, IBlock
         shapeMode = block.shapeMode;
         spriteRenderer = gameObject.GetComponent(typeof(SpriteRenderer)) as SpriteRenderer;
         spriteRenderer.sprite = sprites[(int)type];
-        PossibleDirections = block.PossibleDirections;
+        foreach (Vector3 dir in block.PossibleDirections)
+        {
+            PossibleDirections.Add(dir);
+        }
+        Rotate(block.Angle);
     }
 
     public void Rotate(int angle)
     {
+        Angle += angle;
+        // Поворот блока на сцене и всего что на нём находится
         transform.Rotate(new Vector3(0.0f, 0.0f, 0.5f), angle);
-        foreach(var item in items)
+        foreach (var item in items)
         {
             item.transform.Rotate(new Vector3(0.0f, 0.0f, 0.5f), angle);
-        }
-
-        for(int i = 0; i < PossibleDirections.Count; i++)
-        {
-            var currentDirection = PossibleDirections[i];
-            float cs = (float)Math.Cos(angle * Math.PI / 180);
-            float sn = (float)Math.Sin(angle * Math.PI / 180);
-            float oldX = currentDirection.x;
-            float oldY = currentDirection.y;
-            currentDirection.x = (int)Math.Round(oldX * cs - oldY * sn);
-            currentDirection.y = (int)Math.Round(oldX * sn + oldY * cs);
-            PossibleDirections[i] = currentDirection;
         }
         ItemRotated?.Invoke(this, angle);
     }
 
     private void OnMouseDown()
     {
+        Debug.Log($"Block type: {this.type}");
+        Debug.Log($"Block directions: {this.PossibleDirections}");
+
         onBlockClicked(gameObject);
     }
 

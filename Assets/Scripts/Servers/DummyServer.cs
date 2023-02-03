@@ -56,6 +56,7 @@ namespace Assets.Scripts.Servers
                 resp.success = true;
                 resp.angle = sign * IBlock.RotateAngle[block.shapeMode];
                 _block.Rotate(resp.angle);
+                resp.directions = _block.PossibleDirections;
             }
             return resp;
         }

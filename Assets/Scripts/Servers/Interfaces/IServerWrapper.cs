@@ -25,6 +25,7 @@ namespace Assets.Scripts.Servers.Interfaces
     {
         public bool success;
         public int angle;
+        public IEnumerable<Vector3> directions;
     }
 
     /// <summary>

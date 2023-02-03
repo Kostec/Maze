@@ -1,5 +1,6 @@
 using Assets.Scripts;
 using Assets.Scripts.Servers.Interfaces;
+using Assets.Scripts.Servers.Items;
 using System;
 using UnityEngine;
 
@@ -11,6 +12,8 @@ public class Player : MonoBehaviour, IPlayer, IFieldItem
     public uint Id { get; private set; }
     public string Name { get; private set; }
     public PlayerType Type { get; private set; }
+
+    public int Angle { get; }
 
     public event PlayerMoving onPlayerMoving;
     public event FieldItemShifted ItemShifted;
@@ -58,7 +61,7 @@ public class Player : MonoBehaviour, IPlayer, IFieldItem
     // Update is called once per frame
     void Update()
     {
-        if (playerCanMove && inputhandler.KeyCheck())
+        if (playerCanMove && (inputhandler != null) && inputhandler.KeyCheck())
         {
             finishCurrentState(this, new EventArgs());
         }
@@ -140,7 +143,7 @@ public class PlayerInputHandler : InputHandler
     }
 
     public void onObjectSelected(GameObject block)
-    {
+    { 
         // TODO перемещение к позиции
     }
 }

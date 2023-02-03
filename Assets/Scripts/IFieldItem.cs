@@ -15,6 +15,7 @@ namespace Assets.Scripts
         event FieldItemShifted ItemShifted;
         event FieldItemRotated ItemRotated;
         event FieldPositionChanged ItemPositionChanged;
+        int Angle { get; }
         Vector3 Position { get; set; }
         void Shift(Vector3 direction);
         void Rotate(int angle);
