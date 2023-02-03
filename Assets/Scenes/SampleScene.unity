@@ -270,4 +270,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   playerPrefab: {fileID: 107043837379852375, guid: a5e5992f1bca2124a8902e7ecc978e3e, type: 3}
   fieldController: {fileID: 2050658780}
-  playerNumber: 1
+  playerNumber: 2

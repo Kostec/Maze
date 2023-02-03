@@ -22,7 +22,7 @@ public class GameController : MonoBehaviour
     [SerializeField]
     public FieldController fieldController;
     [SerializeField]
-    public uint playerNumber = 1;
+    public uint playerNumber = 2;
 
     private GameState gameState;
     public GameState GameState { 

@@ -19,6 +19,7 @@ namespace Assets.Scripts.Servers
         private Vector3 bufferPosition = new Vector3(-1, -1, 0);
         private IBlock bufferBlock;
         private List<Vector3> playerSpawnPositions = new List<Vector3>();
+        private uint playersInGame = 0;
         public DummyServer()
         {
             fieldGenerator = new FieldGenerator();
@@ -87,6 +88,7 @@ namespace Assets.Scripts.Servers
         {
             if (players.Count < IServerWrapper.MaximumPlayerCount)
             {
+                playersInGame = (uint)players.Count;
                 IPlayer player = new ServerPlayer(name, type, playerSpawnPositions[players.Count]);
                 players.Add(player);
                 return player;

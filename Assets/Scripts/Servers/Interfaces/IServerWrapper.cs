@@ -34,7 +34,7 @@ namespace Assets.Scripts.Servers.Interfaces
     /// </summary
     public interface IServerWrapper
     {
-        static uint MaximumPlayerCount = 1;
+        static uint MaximumPlayerCount = 4;
         ShiftResponse ShiftLine(IBlock baseBlock, Vector3 direction);
         RotateResponse RotateBlock(IBlock block, RotateSide side);
         bool MovePlayerToTarget(Player player, Vector3 target);
